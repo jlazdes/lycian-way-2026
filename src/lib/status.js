@@ -1,6 +1,6 @@
 // Single source of truth for status -> visual treatment. Used by every screen and the map.
 
-const FALLBACK_COLORS = { neutral: "#5b6b73", orange: "#d97706", red: "#c62828" };
+const FALLBACK_COLORS = { neutral: "#AAAAAA", orange: "#FF8800", yellow: "#FFEE00", red: "#FF0000" };
 
 export function statusColor(config, status) {
   return config?.status?.[status]?.color ?? FALLBACK_COLORS[status] ?? FALLBACK_COLORS.neutral;
@@ -28,8 +28,9 @@ export function statusBadgeHtml(config, status, { small = false } = {}) {
   const color = statusColor(config, status);
   const label = statusLabel(config, status);
   const sizeClass = small ? "status-badge status-badge--small" : "status-badge";
+  const showWarn = status === "orange" || status === "yellow" || status === "red";
   return `<span class="${sizeClass}" style="--status-color:${color}" title="${escapeHtml(label)}">
-    <span class="status-badge__dot"></span>${status === "orange" || status === "red" ? "<span class=\"status-badge__warn\">&#9650;</span>" : ""}
+    <span class="status-badge__dot"></span>${showWarn ? "<span class=\"status-badge__warn\">&#9650;</span>" : ""}
   </span>`;
 }
 

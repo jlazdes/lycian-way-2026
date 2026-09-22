@@ -10,7 +10,7 @@ import path from "node:path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.join(__dirname, "..", "data");
 
-const STATUS_VALUES = new Set(["neutral", "orange", "red"]);
+const STATUS_VALUES = new Set(["neutral", "orange", "yellow", "red"]);
 const CONFIDENCE_VALUES = new Set(["high", "medium", "low"]);
 const WATER_TYPES = new Set(["public_tap", "village_fountain", "spring", "cistern", "cafe", "pension", "shop", "other"]);
 const WATER_STATUS = new Set(["confirmed_available", "seasonal", "uncertain", "reported_dry", "confirmed_unavailable"]);

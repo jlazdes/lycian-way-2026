@@ -1,15 +1,165 @@
 {
   "_comment": "Named locations used as route endpoints/waypoints. coordType 'town_center_estimate' means approximate only — see sources.geocoding_estimate. coordType 'surveyed' means a precise point from a specific source (e.g. the user's spring waypoint).",
   "places": [
-    { "id": "place-dalaman-airport", "name": "Dalaman Airport (DLM)", "coordType": "town_center_estimate", "coordinates": [28.7925, 36.7131], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
-    { "id": "place-oludeniz", "name": "Ölüdeniz", "coordType": "town_center_estimate", "coordinates": [29.1167, 36.5500], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
-    { "id": "place-ovacik", "name": "Ovacık", "coordType": "town_center_estimate", "coordinates": [29.0997, 36.5567], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
-    { "id": "place-faralya", "name": "Faralya (Kirme)", "coordType": "town_center_estimate", "coordinates": [29.1069, 36.4886], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
-    { "id": "place-kabak", "name": "Kabak", "coordType": "town_center_estimate", "coordinates": [29.1119, 36.4708], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
-    { "id": "place-alinca", "name": "Alınca", "coordType": "town_center_estimate", "coordinates": [29.1494, 36.4472], "confidence": "low", "status": "orange", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "Low confidence estimate — needs a real reference point." },
-    { "id": "place-yediburunlar", "name": "Yediburunlar", "coordType": "town_center_estimate", "coordinates": [29.2464, 36.3711], "confidence": "low", "status": "orange", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "Low confidence estimate — needs a real reference point." },
-    { "id": "place-bel", "name": "Bel", "coordType": "town_center_estimate", "coordinates": [29.2833, 36.3167], "confidence": "low", "status": "orange", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "Low confidence estimate — position of 'Bel' as a Lycian Way waypoint is not firmly pinned down here yet." },
-    { "id": "place-patara", "name": "Patara / Gelemiş", "coordType": "town_center_estimate", "coordinates": [29.3181, 36.2647], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
-    { "id": "place-spring-kabak-alinca", "name": "Spring on Kabak–Alınca climb", "coordType": "surveyed", "coordinates": [29.1447, 36.4651], "confidence": "high", "status": "orange", "lastVerified": "2026-09-22", "sources": ["user_itinerary"], "notes": "Coordinate as given in the original itinerary document. Reliability/season not yet independently verified — see water.json." }
+    {
+      "id": "place-dalaman-airport",
+      "name": "Dalaman Airport (DLM)",
+      "coordType": "town_center_estimate",
+      "coordinates": [
+        28.7925,
+        36.7131
+      ],
+      "confidence": "medium",
+      "status": "neutral",
+      "lastVerified": "2026-09-22",
+      "sources": [
+        "geocoding_estimate"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "place-oludeniz",
+      "name": "Ölüdeniz",
+      "coordType": "town_center_estimate",
+      "coordinates": [
+        29.1167,
+        36.55
+      ],
+      "confidence": "medium",
+      "status": "neutral",
+      "lastVerified": "2026-09-22",
+      "sources": [
+        "geocoding_estimate"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "place-ovacik",
+      "name": "Ovacık",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.153447,
+        36.5790201
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-09-23",
+      "sources": [
+        "osm_place_nodes"
+      ],
+      "notes": "OSM place node; replaces earlier rough estimate."
+    },
+    {
+      "id": "place-faralya",
+      "name": "Faralya (Kirme)",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.1187843,
+        36.4819843
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-09-23",
+      "sources": [
+        "osm_place_nodes"
+      ],
+      "notes": "OSM place node; replaces earlier rough estimate."
+    },
+    {
+      "id": "place-kabak",
+      "name": "Kabak",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.1259497,
+        36.462043
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-09-23",
+      "sources": [
+        "osm_place_nodes"
+      ],
+      "notes": "OSM place node; replaces earlier rough estimate."
+    },
+    {
+      "id": "place-alinca",
+      "name": "Alınca",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.1431063,
+        36.4477731
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-09-23",
+      "sources": [
+        "osm_place_nodes"
+      ],
+      "notes": "OSM place node; replaces earlier low-confidence estimate."
+    },
+    {
+      "id": "place-yediburunlar",
+      "name": "Yediburunlar",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.1374036,
+        36.4012285
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-09-23",
+      "sources": [
+        "osm_place_nodes"
+      ],
+      "notes": "OSM place node; replaces earlier low-confidence estimate."
+    },
+    {
+      "id": "place-bel",
+      "name": "Bel",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.1712931,
+        36.3825194
+      ],
+      "confidence": "high",
+      "status": "orange",
+      "lastVerified": "2026-09-23",
+      "sources": [
+        "osm_place_nodes"
+      ],
+      "notes": "OSM place node gives a confident coordinate for this waypoint. Still orange: the onward trail connection from here to Patara could not be reliably reconstructed — see routes.json route-yediburunlar-bel-patara notes."
+    },
+    {
+      "id": "place-patara",
+      "name": "Patara / Gelemiş",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.319328,
+        36.275652
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-09-23",
+      "sources": [
+        "osm_place_nodes"
+      ],
+      "notes": "Uses OSM's 'Gelemiş' village node, the settlement adjacent to Patara beach/ruins — commonly used interchangeably with 'Patara' in this area."
+    },
+    {
+      "id": "place-spring-kabak-alinca",
+      "name": "Spring on Kabak–Alınca climb",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.1447,
+        36.4651
+      ],
+      "confidence": "high",
+      "status": "orange",
+      "lastVerified": "2026-09-22",
+      "sources": [
+        "user_itinerary"
+      ],
+      "notes": "Coordinate as given in the original itinerary document. Reliability/season not yet independently verified — see water.json."
+    }
   ]
 }
