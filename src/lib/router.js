@@ -1,6 +1,8 @@
 // Minimal hash router — no framework. Routes map to a render(container, params) function.
 
 const routes = [];
+let routeChangeListener = null;
+const DEFAULT_HASH = "#/map";
 
 export function registerRoute(pattern, render) {
   // pattern like "#/day/:id" -> regex with named group
@@ -11,6 +13,10 @@ export function registerRoute(pattern, render) {
   });
   const regex = new RegExp(`^${regexStr}$`);
   routes.push({ regex, paramNames, render });
+}
+
+export function onRouteChange(listener) {
+  routeChangeListener = listener;
 }
 
 export function navigate(hash) {
@@ -32,9 +38,9 @@ function matchRoute(hash) {
 
 async function render() {
   const container = document.getElementById("screen");
-  const hash = location.hash || "#/today";
+  const hash = location.hash || DEFAULT_HASH;
   const match = matchRoute(hash);
-  updateNavActiveState(hash);
+  routeChangeListener?.(hash);
   if (!match) {
     container.innerHTML = `<div class="screen-pad"><p>Not found.</p></div>`;
     return;
@@ -45,13 +51,6 @@ async function render() {
     console.error(e);
     container.innerHTML = `<div class="screen-pad"><p>Something went wrong loading this screen.</p></div>`;
   }
-}
-
-function updateNavActiveState(hash) {
-  const top = "#/" + hash.slice(2).split("/")[0];
-  document.querySelectorAll(".nav a").forEach((a) => {
-    a.classList.toggle("nav__link--active", a.getAttribute("href") === top || (top === "#/today" && a.getAttribute("href") === "#/today"));
-  });
 }
 
 export function startRouter() {

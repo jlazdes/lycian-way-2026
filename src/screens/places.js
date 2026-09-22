@@ -1,10 +1,11 @@
 import { getConfig, getAttractions } from "../lib/data.js";
-import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
+import { statusBadgeHtml, escapeHtml, kbBackLink } from "../lib/status.js";
 
 export async function renderPlaces(container) {
   const [config, attractions] = await Promise.all([getConfig(), getAttractions()]);
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="section-title">Places to see</div>
       ${attractions.map((a) => `
         <div class="card">

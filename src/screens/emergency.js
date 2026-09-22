@@ -1,9 +1,10 @@
-import { escapeHtml } from "../lib/status.js";
+import { escapeHtml, kbBackLink } from "../lib/status.js";
 import { subscribeGps, startGps } from "../lib/gps.js";
 
 export async function renderEmergency(container) {
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="card">
         <h3>Emergency number</h3>
         <p style="font-size:1.6rem;font-weight:700;">112</p>

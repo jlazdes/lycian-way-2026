@@ -1,6 +1,7 @@
 // Lightweight SVG corridor renderer — the map fallback that works with zero network
 // and zero tile provider. Projects lon/lat linearly within the trip bounding box,
-// which is fine at this geographic scale (a few tens of km).
+// which is fine at this geographic scale (a few tens of km). Fills its container
+// edge-to-edge so it reads the same as the live map screen.
 
 import { statusColor, escapeHtml } from "./status.js";
 
@@ -12,7 +13,7 @@ function project(bbox, [lon, lat], width, height, pad) {
 
 export function renderOfflineMap(container, { config, places, routes, water, gpsPosition }) {
   const bbox = config.map.boundingBox;
-  const width = 400, height = 520, pad = 24;
+  const width = 400, height = 640, pad = 30;
   const placeById = new Map(places.map((p) => [p.id, p]));
 
   const routeLines = routes.map((r) => {
@@ -32,7 +33,7 @@ export function renderOfflineMap(container, { config, places, routes, water, gps
     const color = statusColor(config, p.status);
     return `
       <circle cx="${x}" cy="${y}" r="5" fill="${color}" stroke="#0e1613" stroke-width="1.5"/>
-      <text x="${x + 8}" y="${y + 4}" font-size="9" fill="#eef2ee">${escapeHtml(p.name)}</text>
+      <text x="${x + 8}" y="${y + 4}" font-size="10" fill="#eef2ee">${escapeHtml(p.name)}</text>
     `;
   }).join("");
 
@@ -49,17 +50,11 @@ export function renderOfflineMap(container, { config, places, routes, water, gps
     : "";
 
   container.innerHTML = `
-    <div style="text-align:center;">
-      <svg viewBox="0 0 ${width} ${height}" style="width:100%;max-width:420px;background:#182420;border-radius:10px;border:1px solid var(--border);">
-        ${routeLines}
-        ${waterMarkers}
-        ${placeMarkers}
-        ${gpsMarker}
-      </svg>
-      <p style="color:var(--text-dim);font-size:0.75rem;margin-top:8px;">
-        Offline corridor view — dashed lines are straight-line placeholders, not surveyed track geometry.
-        Blue dots are water points.
-      </p>
-    </div>
+    <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;background:#182420;">
+      ${routeLines}
+      ${waterMarkers}
+      ${placeMarkers}
+      ${gpsMarker}
+    </svg>
   `;
 }

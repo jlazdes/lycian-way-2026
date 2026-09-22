@@ -26,8 +26,8 @@
       "north": 36.75
     },
     "tileProvider": {
-      "note": "Swappable — do not hardcode this provider elsewhere in the app. lib/map.js reads this value.",
-      "styleUrl": ""
+      "note": "Swappable — do not hardcode this provider elsewhere in the app. lib/map.js reads this value. OpenFreeMap is free, no API key, no usage cap as of writing.",
+      "styleUrl": "https://tiles.openfreemap.org/styles/positron"
     }
   },
   "status": {

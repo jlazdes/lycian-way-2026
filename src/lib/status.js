@@ -33,6 +33,10 @@ export function statusBadgeHtml(config, status, { small = false } = {}) {
   </span>`;
 }
 
+export function kbBackLink() {
+  return `<a href="#/knowledge" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block;">&larr; Knowledge Base</a>`;
+}
+
 export function escapeHtml(str) {
   return String(str ?? "").replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",

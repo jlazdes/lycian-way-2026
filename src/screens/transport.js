@@ -1,10 +1,11 @@
 import { getConfig, getTransport } from "../lib/data.js";
-import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
+import { statusBadgeHtml, escapeHtml, kbBackLink } from "../lib/status.js";
 
 export async function renderTransport(container) {
   const [config, legs] = await Promise.all([getConfig(), getTransport()]);
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="section-title">Transport</div>
       ${legs.map((t) => `
         <div class="card">

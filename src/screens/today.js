@@ -1,5 +1,5 @@
 import { getConfig, getItinerary, getRouteById, getAlerts } from "../lib/data.js";
-import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
+import { statusBadgeHtml, escapeHtml, kbBackLink } from "../lib/status.js";
 import { saveForOffline, isSavedForOffline } from "../lib/offline.js";
 import { subscribeGps, startGps } from "../lib/gps.js";
 
@@ -20,6 +20,7 @@ export async function renderToday(container) {
 
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="card">
         <div class="pill-row"><span class="pill">${escapeHtml(day.date)}</span>${statusBadgeHtml(config, day.status)}</div>
         <h3>${escapeHtml(day.title)}</h3>

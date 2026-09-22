@@ -2,12 +2,13 @@ import {
   getConfig, getItinerary, getDayById, getRouteById, getPlaceById,
   getAccommodation, getFood, getWater, getTransport,
 } from "../lib/data.js";
-import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
+import { statusBadgeHtml, escapeHtml, kbBackLink } from "../lib/status.js";
 
 export async function renderItinerary(container) {
   const [config, days] = await Promise.all([getConfig(), getItinerary()]);
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="section-title">Itinerary</div>
       ${days.map((d) => `
         <a href="#/itinerary/${d.id}" class="card" style="display:block;text-decoration:none;color:inherit;">

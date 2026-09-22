@@ -11,27 +11,26 @@ export async function renderMap(container) {
   const liveTilesAvailable = navigator.onLine && Boolean(config.map.tileProvider.styleUrl);
 
   container.innerHTML = `
-    <div class="screen-pad">
-      <div class="section-title">Map</div>
-      ${!config.map.tileProvider.styleUrl ? `<p class="empty-state">No live tile provider configured yet — showing the offline corridor view. See data/config.json map.tileProvider.styleUrl.</p>` : ""}
+    <div class="map-screen">
       <div id="map-canvas-wrap"></div>
-      <div class="link-row">
-        <button class="btn" id="gpx-btn">Download GPX</button>
-      </div>
+      <button class="map-fab" id="gpx-btn" title="Download GPX" aria-label="Download GPX">GPX</button>
+      <div id="map-fallback-note" class="map-fallback-note" hidden>Offline corridor view — no live map tiles right now.</div>
     </div>
   `;
 
   const wrap = container.querySelector("#map-canvas-wrap");
+  const fallbackNote = container.querySelector("#map-fallback-note");
 
   async function drawOffline() {
+    fallbackNote.hidden = false;
     renderOfflineMap(wrap, { config, places, routes, water, gpsPosition: getLastPosition() });
   }
 
   if (liveTilesAvailable) {
     try {
       const { mountMapLibre } = await import("../lib/map.js");
-      wrap.innerHTML = `<div id="maplibre-container"></div>`;
-      await mountMapLibre(wrap.querySelector("#maplibre-container"), { config, places });
+      wrap.innerHTML = `<div id="maplibre-container" style="width:100%;height:100%;"></div>`;
+      await mountMapLibre(wrap.querySelector("#maplibre-container"), { config, places, water });
     } catch (e) {
       console.warn("MapLibre failed to load, falling back to offline corridor view", e);
       await drawOffline();

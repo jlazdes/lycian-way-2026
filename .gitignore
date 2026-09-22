@@ -3,3 +3,4 @@ dist
 .DS_Store
 *.log
 .github/workflows/deploy.yml
+public/vendor

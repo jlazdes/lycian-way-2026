@@ -1,22 +1,6 @@
-import { listKnowledgeArticles, getKnowledgeArticle } from "../lib/data.js";
+import { getKnowledgeArticle } from "../lib/data.js";
 import { escapeHtml } from "../lib/status.js";
 import { renderMarkdown } from "../lib/markdown.js";
-
-export async function renderKnowledgeList(container) {
-  const slugs = await listKnowledgeArticles();
-  const articles = await Promise.all(slugs.map((s) => getKnowledgeArticle(s).then((a) => [s, a])));
-  container.innerHTML = `
-    <div class="screen-pad">
-      <div class="section-title">Knowledge base</div>
-      ${articles.map(([slug, a]) => `
-        <a href="#/knowledge/${slug}" class="card" style="display:block;text-decoration:none;color:inherit;">
-          <h3>${escapeHtml(a.meta.title ?? slug)}</h3>
-          <p>Confidence: ${escapeHtml(a.meta.confidence ?? "?")} &middot; last verified ${escapeHtml(a.meta.lastVerified ?? "?")}</p>
-        </a>
-      `).join("")}
-    </div>
-  `;
-}
 
 export async function renderKnowledgeArticle(container, { slug }) {
   const article = await getKnowledgeArticle(slug);

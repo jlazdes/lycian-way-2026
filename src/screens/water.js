@@ -1,5 +1,5 @@
 import { getConfig, getWater } from "../lib/data.js";
-import { statusBadgeHtml, waterVisualStatus, escapeHtml } from "../lib/status.js";
+import { statusBadgeHtml, waterVisualStatus, escapeHtml, kbBackLink } from "../lib/status.js";
 
 export async function renderWater(container) {
   const [config, water] = await Promise.all([getConfig(), getWater()]);
@@ -7,6 +7,7 @@ export async function renderWater(container) {
 
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="section-title">Water points</div>
       ${water.waterPoints.length ? water.waterPoints.map((w) => `
         <div class="card">

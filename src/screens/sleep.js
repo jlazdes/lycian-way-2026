@@ -1,10 +1,11 @@
 import { getConfig, getAccommodation } from "../lib/data.js";
-import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
+import { statusBadgeHtml, escapeHtml, kbBackLink } from "../lib/status.js";
 
 export async function renderSleep(container) {
   const [config, accommodations] = await Promise.all([getConfig(), getAccommodation()]);
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="section-title">Sleep</div>
       ${accommodations.length ? accommodations.map((a) => `
         <div class="card">

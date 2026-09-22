@@ -1,10 +1,11 @@
 import { getConfig, getFood, getFuel } from "../lib/data.js";
-import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
+import { statusBadgeHtml, escapeHtml, kbBackLink } from "../lib/status.js";
 
 export async function renderResupply(container) {
   const [config, foods, fuel] = await Promise.all([getConfig(), getFood(), getFuel()]);
   container.innerHTML = `
     <div class="screen-pad">
+      ${kbBackLink()}
       <div class="section-title">Food &amp; shops</div>
       ${foods.length ? foods.map((f) => `
         <div class="card">
