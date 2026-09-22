@@ -1,0 +1,100 @@
+{
+  "_comment": "Registry of every source cited elsewhere in /data. Add a record here before citing a new sourceId anywhere else — the validator checks references resolve.",
+  "sources": [
+    {
+      "id": "user_itinerary",
+      "level": 5,
+      "type": "document",
+      "title": "Lycian voyage 8.10.26.pdf",
+      "description": "Julia's original hand-built itinerary document, including AllTrails links and camp research.",
+      "url": null,
+      "retrieved": "2026-09-22"
+    },
+    {
+      "id": "flight_ajet_confirmation",
+      "level": 1,
+      "type": "document",
+      "title": "AJet ticket confirmation, reservation 4P2CC6",
+      "description": "Tbilisi-Ankara-Dalaman outbound flights for Aziza Iusupova, Artem Tidva, Iuliia Lazovskaia, 8 Oct 2026.",
+      "url": null,
+      "retrieved": "2026-09-08"
+    },
+    {
+      "id": "flight_pegasus_confirmation",
+      "level": 1,
+      "type": "document",
+      "title": "Pegasus/flypgs flight info, reservation 2FA4KA",
+      "description": "Antalya-Tbilisi return flight PC1840 for Iuliia Lazovskaia, 18 Oct 2026.",
+      "url": null,
+      "retrieved": "2026-09-17"
+    },
+    {
+      "id": "alltrails_ovacik_faralya",
+      "level": 5,
+      "type": "web",
+      "title": "AllTrails: The Lycian Way, Ovacik to Faralya",
+      "url": "https://www.alltrails.com/explore/trail/turkey/mugla/the-lycian-way-ovacik-to-faralya",
+      "retrieved": "2026-09-22",
+      "notes": "Per Culture Routes Society, OSM is the current route reference, not AllTrails. Stored as a secondary source only."
+    },
+    {
+      "id": "alltrails_faralya_kabak",
+      "level": 5,
+      "type": "web",
+      "title": "AllTrails: Lycian Way, Faralya to Kabak",
+      "url": "https://www.alltrails.com/explore/trail/turkey/mugla/lycian-way-faralya-kabak",
+      "retrieved": "2026-09-22"
+    },
+    {
+      "id": "alltrails_kabak_alinca",
+      "level": 5,
+      "type": "web",
+      "title": "AllTrails: Lycian Way, Kabak Beach to Alincak",
+      "url": "https://www.alltrails.com/explore/trail/turkey/mugla/lycian-way-kabak-beach-to-alincak",
+      "retrieved": "2026-09-22"
+    },
+    {
+      "id": "alltrails_kabak_paradise_beach_closed",
+      "level": 5,
+      "type": "web",
+      "title": "AllTrails: Kabak - Paradise Beach [CLOSED] — fire closure alert",
+      "url": "https://www.alltrails.com",
+      "retrieved": "2026-09-22",
+      "notes": "Screenshot in user_itinerary shows a closure alert dated 'as of September 2026' citing ogm.gov.tr. Not independently verified against OGM yet."
+    },
+    {
+      "id": "alltrails_alinca_yediburunlar",
+      "level": 5,
+      "type": "web",
+      "title": "AllTrails: Lycian Way, Alinca to Yediburunlar",
+      "url": "https://www.alltrails.com/explore/trail/turkey/mugla/lycian-way-alinca-yediburunlar",
+      "retrieved": "2026-09-22"
+    },
+    {
+      "id": "alltrails_yediburunlar_bel_patara",
+      "level": 5,
+      "type": "web",
+      "title": "AllTrails: Lycian Way, Yediburunlar to Bel to Patara",
+      "url": "https://www.alltrails.com/explore/trail/turkey/mugla/lycian-way-yediburunlar-bel-patara",
+      "retrieved": "2026-09-22"
+    },
+    {
+      "id": "geocoding_estimate",
+      "level": 3,
+      "type": "model_knowledge",
+      "title": "Approximate town-center coordinates (Claude general geographic knowledge)",
+      "description": "Used only for rough place-marker positions where no surveyed point exists yet. NOT a route waypoint, NOT a water/POI location claim. Replace with a real GPS track or OSM node as soon as one is available.",
+      "url": null,
+      "retrieved": "2026-09-22"
+    },
+    {
+      "id": "ogm_gov_tr",
+      "level": 1,
+      "type": "web",
+      "title": "T.C. Tarim ve Orman Bakanligi, Orman Genel Mudurlugu (OGM)",
+      "description": "Official Turkish Forestry General Directorate — authoritative source for forest-entry / fire-season restrictions. Not yet queried for the exact restricted polygons overlapping this route.",
+      "url": "https://www.ogm.gov.tr/en",
+      "retrieved": "2026-09-22"
+    }
+  ]
+}

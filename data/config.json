@@ -1,0 +1,46 @@
+{
+  "appVersion": "0.1.0",
+  "dataVersion": "2026-09-22",
+  "cacheVersion": "lycian-2026-v1",
+  "trip": {
+    "name": "Lycian Way 2026",
+    "startDate": "2026-10-08",
+    "endDate": "2026-10-18"
+  },
+  "group": {
+    "members": [
+      { "id": "julia", "name": "Julia" },
+      { "id": "aziza", "name": "Aziza" },
+      { "id": "artem", "name": "Artem" }
+    ]
+  },
+  "water": {
+    "defaultCapacityLitersPerPerson": 3
+  },
+  "map": {
+    "boundingBox": {
+      "note": "Trip corridor only: Dalaman/Olu Deniz to Patara/Gelemis. Widen only if itinerary days 14-18 extend it.",
+      "west": 28.75,
+      "south": 36.20,
+      "east": 29.45,
+      "north": 36.75
+    },
+    "tileProvider": {
+      "note": "Swappable — do not hardcode this provider elsewhere in the app. lib/map.js reads this value.",
+      "styleUrl": ""
+    }
+  },
+  "status": {
+    "neutral": { "color": "#5b6b73", "label": "Verified / current" },
+    "orange": { "color": "#d97706", "label": "Uncertain / needs checking" },
+    "red": { "color": "#c62828", "label": "Confirmed closed / unavailable" }
+  },
+  "staleness": {
+    "transportDays": 30,
+    "shopsDays": 30,
+    "accommodationDays": 30,
+    "waterDays": 30,
+    "trailClosureDays": 14,
+    "fireRestrictionDays": 7
+  }
+}

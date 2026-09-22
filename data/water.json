@@ -1,0 +1,41 @@
+{
+  "_comment": "HIGHEST PRIORITY data category per spec. Deliberately sparse right now — only the one point named in the user's own itinerary is seeded. All the leads listed in the spec (Ovacik-Kozagac-Kirme-Faralya, Kabak fountains, Alinca well, Yediburunlar-Bel, Bel fountain, Bel-Gavuragili, Gavuragili, Patara/Gelemis) are NOT yet researched — do not infer availability. Autumn reliability specifically must be checked before trusting any spring-season report.",
+  "waterPoints": [
+    {
+      "id": "water-spring-kabak-alinca",
+      "name": "Spring on the Kabak–Alınca climb",
+      "placeId": "place-spring-kabak-alinca",
+      "coordinates": [29.1447, 36.4651],
+      "waterType": "spring",
+      "status": "uncertain",
+      "confidence": "low",
+      "seasonality": "unknown",
+      "treatment": "treat_recommended",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "Coordinate is from the original itinerary document only. Existence/flow/October reliability not independently confirmed. Treat as unproven until checked — per spec, never assume a natural spring is safe untreated just because it's marked."
+    }
+  ],
+  "dayWaterPlans": [
+    {
+      "dayId": "day-2026-10-09",
+      "lastReliableRefill": null,
+      "nextReliableRefill": null,
+      "longestKnownGapKm": null,
+      "seasonalSourcesInPlay": [],
+      "groupCapacityLitersPerPerson": 3,
+      "risk": "unknown",
+      "notes": "Not yet researched. Cafés along this day (see food.json) may double as refill points but that is unconfirmed."
+    },
+    {
+      "dayId": "day-2026-10-10",
+      "lastReliableRefill": null,
+      "nextReliableRefill": "water-spring-kabak-alinca",
+      "longestKnownGapKm": 6.3,
+      "seasonalSourcesInPlay": ["water-spring-kabak-alinca"],
+      "groupCapacityLitersPerPerson": 3,
+      "risk": "unknown",
+      "notes": "Original notes say no shops/restaurants on this leg at all. This is the day with the highest water-planning priority to research first."
+    }
+  ]
+}

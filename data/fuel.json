@@ -1,0 +1,5 @@
+{
+  "_comment": "Group uses Jetboil (EN417 / 7-16 screw-thread canisters). No sellers researched yet — this file is schema-only until a fuel research pass is done. sellerConfirmed and canisterStockConfirmed must be tracked separately per spec — never collapse them.",
+  "fuelType": "EN417 (7/16-28 UNEF screw-thread) camping gas canister, for Jetboil stoves",
+  "sellers": []
+}

@@ -1,0 +1,53 @@
+{
+  "_comment": "Camps/accommodation named in the original itinerary. Prices are as reported in reviews the user read — not independently confirmed.",
+  "accommodations": [
+    {
+      "id": "accom-secret-garden-camp",
+      "name": "Secret Garden Camp",
+      "placeId": "place-kabak",
+      "type": "camp",
+      "priceInfo": "~150 TRY/person/night per reviews cited in user's research",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "Price is a secondhand report from reviews, not confirmed with the camp directly."
+    },
+    {
+      "id": "accom-kabak-famous-camping",
+      "name": "Kabak Famous Camping",
+      "placeId": "place-kabak",
+      "type": "camp",
+      "priceInfo": "~600 TRY/person per reviews cited in user's research",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "Flagged by Julia as pricier than the alternatives."
+    },
+    {
+      "id": "accom-kabak-lost-camping",
+      "name": "Kabak Lost Camping",
+      "placeId": "place-kabak",
+      "type": "camp",
+      "priceInfo": "unknown",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "Price not found during original research."
+    },
+    {
+      "id": "accom-patara-camps-cluster",
+      "name": "Patara-area camp cluster (Çeyrek Camping & Bungalows, Super Campground, Patara Caravan Camping, Medusa Bar & Camping, and others)",
+      "placeId": "place-patara",
+      "type": "camp",
+      "priceInfo": "varies — not itemized",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "Original document shows several camps clustered near the Patara ruins entrance and near the finish point on Patara beach, via a Google Maps screenshot, without a single chosen pick."
+    }
+  ]
+}

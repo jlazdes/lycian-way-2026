@@ -1,0 +1,15 @@
+{
+  "_comment": "Named locations used as route endpoints/waypoints. coordType 'town_center_estimate' means approximate only — see sources.geocoding_estimate. coordType 'surveyed' means a precise point from a specific source (e.g. the user's spring waypoint).",
+  "places": [
+    { "id": "place-dalaman-airport", "name": "Dalaman Airport (DLM)", "coordType": "town_center_estimate", "coordinates": [28.7925, 36.7131], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
+    { "id": "place-oludeniz", "name": "Ölüdeniz", "coordType": "town_center_estimate", "coordinates": [29.1167, 36.5500], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
+    { "id": "place-ovacik", "name": "Ovacık", "coordType": "town_center_estimate", "coordinates": [29.0997, 36.5567], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
+    { "id": "place-faralya", "name": "Faralya (Kirme)", "coordType": "town_center_estimate", "coordinates": [29.1069, 36.4886], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
+    { "id": "place-kabak", "name": "Kabak", "coordType": "town_center_estimate", "coordinates": [29.1119, 36.4708], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
+    { "id": "place-alinca", "name": "Alınca", "coordType": "town_center_estimate", "coordinates": [29.1494, 36.4472], "confidence": "low", "status": "orange", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "Low confidence estimate — needs a real reference point." },
+    { "id": "place-yediburunlar", "name": "Yediburunlar", "coordType": "town_center_estimate", "coordinates": [29.2464, 36.3711], "confidence": "low", "status": "orange", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "Low confidence estimate — needs a real reference point." },
+    { "id": "place-bel", "name": "Bel", "coordType": "town_center_estimate", "coordinates": [29.2833, 36.3167], "confidence": "low", "status": "orange", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "Low confidence estimate — position of 'Bel' as a Lycian Way waypoint is not firmly pinned down here yet." },
+    { "id": "place-patara", "name": "Patara / Gelemiş", "coordType": "town_center_estimate", "coordinates": [29.3181, 36.2647], "confidence": "medium", "status": "neutral", "lastVerified": "2026-09-22", "sources": ["geocoding_estimate"], "notes": "" },
+    { "id": "place-spring-kabak-alinca", "name": "Spring on Kabak–Alınca climb", "coordType": "surveyed", "coordinates": [29.1447, 36.4651], "confidence": "high", "status": "orange", "lastVerified": "2026-09-22", "sources": ["user_itinerary"], "notes": "Coordinate as given in the original itinerary document. Reliability/season not yet independently verified — see water.json." }
+  ]
+}

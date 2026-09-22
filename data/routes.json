@@ -1,0 +1,86 @@
+{
+  "_comment": "One record per planned day-segment. 'geometry' is intentionally empty until a real GPS track or OSM way is imported — do not fabricate a line. metrics is an array so multiple sources' numbers can coexist per spec (never pick one as absolute truth).",
+  "routes": [
+    {
+      "id": "route-ovacik-faralya-kabak",
+      "name": "Ovacık → Faralya → Kabak",
+      "date": "2026-10-09",
+      "fromPlaceId": "place-ovacik",
+      "toPlaceId": "place-kabak",
+      "viaPlaceIds": ["place-faralya"],
+      "metrics": [
+        { "distanceKm": 18.8, "ascentM": 807, "source": "user_itinerary", "date": "2026-09-22" }
+      ],
+      "geometry": { "type": "LineString", "coordinates": [] },
+      "variants": [],
+      "status": "neutral",
+      "confidence": "medium",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary", "alltrails_ovacik_faralya", "alltrails_faralya_kabak"],
+      "notes": "Route authority per Culture Routes Society is current OSM data, not AllTrails — OSM comparison not yet done. distanceKm/ascentM are from the user's AllTrails-derived plan only."
+    },
+    {
+      "id": "route-kabak-alinca",
+      "name": "Kabak → Alınca",
+      "date": "2026-10-10",
+      "fromPlaceId": "place-kabak",
+      "toPlaceId": "place-alinca",
+      "viaPlaceIds": [],
+      "metrics": [
+        { "distanceKm": 6.3, "ascentM": 773, "source": "user_itinerary", "date": "2026-09-22" }
+      ],
+      "geometry": { "type": "LineString", "coordinates": [] },
+      "variants": [
+        {
+          "id": "variant-paradise-beach",
+          "name": "Via Paradise Beach / Cennet Koyu",
+          "status": "orange",
+          "confidence": "low",
+          "notes": "User's source screenshot shows an AllTrails closure alert for Kabak–Paradise Beach dated 'as of September 2026', citing an active-fire/increased-risk closure and linking ogm.gov.tr. NOT independently confirmed against OGM yet — do not treat as a confirmed red closure until checked directly against the Forestry Directorate. The main Kabak–Alınca route above is treated as the current plan; this variant is flagged, not chosen or discarded.",
+          "sources": ["alltrails_kabak_paradise_beach_closed", "ogm_gov_tr"]
+        }
+      ],
+      "status": "orange",
+      "confidence": "medium",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary", "alltrails_kabak_alinca"],
+      "notes": "Marked orange because of the unverified Paradise Beach closure on the alternate variant, and because Alınca's own reference point (places.json) is low-confidence."
+    },
+    {
+      "id": "route-alinca-yediburunlar",
+      "name": "Alınca → Yediburunlar",
+      "date": "2026-10-11",
+      "fromPlaceId": "place-alinca",
+      "toPlaceId": "place-yediburunlar",
+      "viaPlaceIds": [],
+      "metrics": [
+        { "distanceKm": 8, "ascentM": 349, "source": "user_itinerary", "date": "2026-09-22" }
+      ],
+      "geometry": { "type": "LineString", "coordinates": [] },
+      "variants": [],
+      "status": "neutral",
+      "confidence": "medium",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary", "alltrails_alinca_yediburunlar"],
+      "notes": ""
+    },
+    {
+      "id": "route-yediburunlar-bel-patara",
+      "name": "Yediburunlar → Bel → Patara",
+      "date": "2026-10-12",
+      "fromPlaceId": "place-yediburunlar",
+      "toPlaceId": "place-patara",
+      "viaPlaceIds": ["place-bel"],
+      "metrics": [
+        { "distanceKm": 16.7, "ascentM": 457, "source": "user_itinerary", "date": "2026-09-22" }
+      ],
+      "geometry": { "type": "LineString", "coordinates": [] },
+      "variants": [],
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary", "alltrails_yediburunlar_bel_patara"],
+      "notes": "Per the spec's own flag: the endpoint and distance for this day conflict with current route structure in other research (e.g. a figure like 17.6 km to a 'Karadere area' endpoint has been mentioned but is NOT yet sourced in this dataset — do not treat that number as confirmed either). Whether the real endpoint is Bel, Gavurağılı, Karadere, or Patara/Gelemiş proper is UNRESOLVED. Both the original plan and the open question are preserved here; nothing has been silently changed."
+    }
+  ]
+}

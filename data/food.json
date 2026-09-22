@@ -1,0 +1,38 @@
+{
+  "_comment": "Grocery/cafe/restaurant records. Existence/hours are as noted in the original itinerary only — none independently re-checked yet.",
+  "foodPlaces": [
+    {
+      "id": "food-likyada-kahvalti",
+      "name": "Likya'da Kahvaltı",
+      "placeId": "place-faralya",
+      "category": "cafe",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "Listed as a cafe on the Ovacik-Faralya-Kabak leg in the original document; hours/current operation not checked."
+    },
+    {
+      "id": "food-halils-cafe",
+      "name": "Halil's Cafe",
+      "placeId": "place-faralya",
+      "category": "cafe",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "Listed as a cafe on the Ovacik-Faralya-Kabak leg in the original document; hours/current operation not checked."
+    },
+    {
+      "id": "food-a101-patara",
+      "name": "A101 (grocery chain)",
+      "placeId": "place-patara",
+      "category": "grocery",
+      "status": "neutral",
+      "confidence": "medium",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "A101 is a nationwide Turkish grocery chain, so existence-in-general is plausible, but this specific branch's location/hours are from a Google Maps screenshot only, not visited."
+    }
+  ]
+}

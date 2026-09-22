@@ -1,0 +1,27 @@
+{
+  "_comment": "Active warnings surfaced app-wide (Today screen, Map, affected day/route/water records). Do not infer a blanket closure — every alert must name the exact segment/area it covers and its evidence.",
+  "alerts": [
+    {
+      "id": "alert-paradise-beach-fire-closure",
+      "title": "Kabak → Paradise Beach: possible fire-season closure",
+      "severity": "orange",
+      "affects": { "routeIds": ["route-kabak-alinca"], "variantIds": ["variant-paradise-beach"] },
+      "description": "An AllTrails alert screenshot in the original itinerary shows the Kabak–Paradise Beach trail closed 'as of September 2026' due to active fire or increased fire risk, citing ogm.gov.tr. This has NOT yet been checked directly against OGM's own current restricted-area data. The planned Kabak–Alınca route (not via Paradise Beach) is unaffected by this specific alert.",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["alltrails_kabak_paradise_beach_closed", "ogm_gov_tr"]
+    },
+    {
+      "id": "alert-mugla-fire-season-restrictions",
+      "title": "Muğla forest-entry fire-season restrictions overlap trip dates",
+      "severity": "orange",
+      "affects": { "routeIds": [], "variantIds": [] },
+      "description": "Trip dates (8-18 Oct 2026) fall within Muğla province's general fire-season window. The exact restricted polygons, their current status in October, and whether/how they intersect the Lycian Way corridor used by this itinerary have NOT been researched yet. Do not assume the whole route is closed, and do not assume stove use is permitted — both need direct confirmation from OGM/local authorities before departure.",
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["ogm_gov_tr"]
+    }
+  ]
+}

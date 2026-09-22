@@ -1,0 +1,13 @@
+{
+  "name": "Lycian Way 2026",
+  "short_name": "Lycian 2026",
+  "description": "Field guide and offline trip OS for the Lycian Way, 8-18 Oct 2026.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#1f2e2a",
+  "theme_color": "#1f2e2a",
+  "icons": [
+    { "src": "icons/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

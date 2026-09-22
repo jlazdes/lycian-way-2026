@@ -1,0 +1,94 @@
+{
+  "_comment": "Confirmed bookings (flights) plus placeholder records for legs the spec calls out as needing research. Placeholder records have mode:null and are status:orange/confidence:low by design — they exist so future research has a stable id to fill in, not because anything is known about them.",
+  "transportLegs": [
+    {
+      "id": "transport-ajet-tbs-esb-dlm",
+      "name": "AJet: Tbilisi → Ankara → Dalaman",
+      "mode": "flight",
+      "date": "2026-10-08",
+      "details": {
+        "reservationCode": "4P2CC6",
+        "segments": [
+          { "flightNo": "VF616", "from": "TBS", "to": "ESB", "depart": "05:15", "arrive": "06:20" },
+          { "flightNo": "VF4070", "from": "ESB", "to": "DLM", "depart": "07:30", "arrive": "08:50" }
+        ],
+        "passengers": ["Aziza Iusupova", "Artem Tidva", "Iuliia Lazovskaia"],
+        "totalFareEUR": 354.24
+      },
+      "status": "neutral",
+      "confidence": "high",
+      "lastVerified": "2026-09-08",
+      "sources": ["flight_ajet_confirmation"],
+      "notes": "Ticketed and confirmed."
+    },
+    {
+      "id": "transport-pegasus-ayt-tbs",
+      "name": "Pegasus/flypgs PC1840: Antalya → Tbilisi",
+      "mode": "flight",
+      "date": "2026-10-18",
+      "details": {
+        "reservationNo": "2FA4KA",
+        "ticketNo": "6242264926056",
+        "flightNo": "PC1840",
+        "from": "AYT",
+        "to": "TBS",
+        "depart": "04:10",
+        "arrive": "07:15",
+        "passenger": "Iuliia Lazovskaia"
+      },
+      "status": "orange",
+      "confidence": "high",
+      "lastVerified": "2026-09-17",
+      "sources": ["flight_pegasus_confirmation"],
+      "notes": "Ticket itself is confirmed; flagged orange only because the itinerary days leading up to it (14-17 Oct) are TBD, so getting to AYT by 04:10 on the 18th isn't planned yet. Return travel for Aziza and Artem is not in the source documents at all."
+    },
+    {
+      "id": "transport-dolmus-adakoy-gelemis-kabak",
+      "name": "Dolmuş: Adaköy/Gelemiş → Kabak",
+      "mode": "dolmus",
+      "date": "2026-10-13",
+      "details": { "approxDistanceKm": 45 },
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-09-22",
+      "sources": ["user_itinerary"],
+      "notes": "UNVERIFIED per original document itself. Direct connection, schedule, frequency and price are all unknown. Needs a research pass covering direct dolmus vs. connections vs. private transfer/taxi."
+    },
+    {
+      "id": "transport-dalaman-fethiye",
+      "name": "Dalaman → Fethiye",
+      "mode": null,
+      "date": null,
+      "details": {},
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": null,
+      "sources": [],
+      "notes": "Not yet researched."
+    },
+    {
+      "id": "transport-fethiye-oludeniz",
+      "name": "Fethiye → Ölüdeniz",
+      "mode": null,
+      "date": null,
+      "details": {},
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": null,
+      "sources": [],
+      "notes": "Not yet researched."
+    },
+    {
+      "id": "transport-fethiye-ovacik",
+      "name": "Fethiye → Ovacık",
+      "mode": null,
+      "date": null,
+      "details": {},
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": null,
+      "sources": [],
+      "notes": "Not yet researched."
+    }
+  ]
+}
