@@ -1,4 +1,23 @@
 {
   "_comment": "Append one record here for every factual correction made after the initial seed. Fields: date, entityId, field, oldValue, newValue, reason, source.",
-  "entries": []
+  "entries": [
+    {
+      "date": "2026-09-23",
+      "entityId": "place-ovacik, place-faralya, place-kabak, place-alinca, place-yediburunlar, place-bel, place-patara",
+      "field": "coordinates, confidence, coordType",
+      "oldValue": "rough town-center estimates, confidence: medium/low, coordType: town_center_estimate",
+      "newValue": "OSM place-node coordinates, confidence: high, coordType: surveyed",
+      "reason": "Fetched real place nodes from OpenStreetMap via Overpass API instead of relying on general geographic estimates.",
+      "source": "osm_place_nodes"
+    },
+    {
+      "date": "2026-09-23",
+      "entityId": "route-ovacik-faralya-kabak, route-kabak-alinca, route-alinca-yediburunlar, route-yediburunlar-bel-patara",
+      "field": "geometry.coordinates, metrics",
+      "oldValue": "empty geometry (straight-line placeholder only)",
+      "newValue": "real trail-following geometry reconstructed from OSM relation 51855 (Likya Yolu), plus a new OSM-sourced distance metric alongside the original AllTrails-derived one. route-yediburunlar-bel-patara only got a partial update (Yediburunlar→Bel) — the Bel→Patara continuation could not be reliably reconstructed (shortest network path found was ~59.5 km, judged to be a data artifact, not real geography) and is flagged, not resolved.",
+      "reason": "Per spec, OSM is the maintained route reference for the Lycian Way (not AllTrails). Distances for 4 of 5 reconstructed legs matched the original AllTrails-derived figures within a few percent, which is a good consistency check.",
+      "source": "osm_lycian_way_relation"
+    }
+  ]
 }

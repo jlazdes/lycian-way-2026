@@ -95,6 +95,24 @@
       "description": "Official Turkish Forestry General Directorate — authoritative source for forest-entry / fire-season restrictions. Not yet queried for the exact restricted polygons overlapping this route.",
       "url": "https://www.ogm.gov.tr/en",
       "retrieved": "2026-09-22"
+    },
+    {
+      "id": "osm_lycian_way_relation",
+      "level": 1,
+      "type": "web",
+      "title": "OpenStreetMap relation 51855 — Likya Yolu / Lycian Way",
+      "description": "Official Lycian Way hiking route relation in OpenStreetMap, fetched via the Overpass API and clipped to the trip bounding box. Per Culture Routes Society, OSM is the maintained route reference for this trail (not AllTrails). Used to derive real trail-following geometry for routes.json via a local shortest-path reconstruction (endpoint graph + Dijkstra) between named waypoints — not a literal download of a single continuous track, so treat as accurate-but-reconstructed, not a GPS survey.",
+      "url": "https://www.openstreetmap.org/relation/51855",
+      "retrieved": "2026-09-23"
+    },
+    {
+      "id": "osm_place_nodes",
+      "level": 1,
+      "type": "web",
+      "title": "OpenStreetMap place nodes (villages/neighbourhoods on the route)",
+      "description": "Coordinates for Ovacık, Faralya, Kabak, Alınca, Yediburunlar, Bel, Gelemiş fetched directly from OSM place=* nodes via Overpass, replacing earlier rough estimates.",
+      "url": "https://www.openstreetmap.org",
+      "retrieved": "2026-09-23"
     }
   ]
 }

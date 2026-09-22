@@ -31,9 +31,19 @@
     }
   },
   "status": {
-    "neutral": { "color": "#5b6b73", "label": "Verified / current" },
-    "orange": { "color": "#d97706", "label": "Uncertain / needs checking" },
-    "red": { "color": "#c62828", "label": "Confirmed closed / unavailable" }
+    "neutral": { "color": "#AAAAAA", "label": "Verified / current" },
+    "orange": { "color": "#FF8800", "label": "Uncertain / needs checking" },
+    "yellow": { "color": "#FFEE00", "label": "Partially confirmed issue" },
+    "red": { "color": "#FF0000", "label": "Confirmed closed / unavailable" }
+  },
+  "routeProgress": {
+    "note": "Colors for the route line itself: gray for not-yet-walked, green for the portion behind the live GPS position (or the demo playhead).",
+    "untraveled": "#AAAAAA",
+    "traveled": "#00FF80"
+  },
+  "gps": {
+    "markerColor": "#1A73E8",
+    "updateIntervalSeconds": 7
   },
   "staleness": {
     "transportDays": 30,
