@@ -2,14 +2,8 @@ import "./style.css";
 import { registerServiceWorker } from "./lib/offline.js";
 import { registerRoute, onRouteChange, startRouter } from "./lib/router.js";
 
-import { renderToday } from "./screens/today.js";
 import { renderMap } from "./screens/map.js";
 import { renderItinerary, renderDay } from "./screens/itinerary.js";
-import { renderWater } from "./screens/water.js";
-import { renderResupply } from "./screens/resupply.js";
-import { renderSleep } from "./screens/sleep.js";
-import { renderTransport } from "./screens/transport.js";
-import { renderPlaces } from "./screens/places.js";
 import { renderKb } from "./screens/kb.js";
 import { renderKnowledgeArticle } from "./screens/knowledge.js";
 import { renderEmergency } from "./screens/emergency.js";
@@ -26,14 +20,8 @@ document.getElementById("app").innerHTML = `
 `;
 
 registerRoute("#/map", renderMap);
-registerRoute("#/today", renderToday);
 registerRoute("#/itinerary", renderItinerary);
 registerRoute("#/itinerary/:dayId", renderDay);
-registerRoute("#/water", renderWater);
-registerRoute("#/resupply", renderResupply);
-registerRoute("#/sleep", renderSleep);
-registerRoute("#/transport", renderTransport);
-registerRoute("#/places", renderPlaces);
 registerRoute("#/knowledge", renderKb);
 registerRoute("#/knowledge/:slug", renderKnowledgeArticle);
 registerRoute("#/emergency", renderEmergency);

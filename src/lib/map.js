@@ -5,6 +5,7 @@ import { statusColor } from "./status.js";
 import { getDisplaySegments, buildMasterTrail } from "./routeGeometry.js";
 import { totalLength, pointAtDistance, splitPolylineAtDistance } from "./geo.js";
 import { getStoredProgressMeters, updateProgress } from "./progress.js";
+import { buildMarkerGroups } from "./mapMarkers.js";
 
 const DEMO_DURATION_MS = 20000;
 
@@ -16,6 +17,14 @@ function dotMarker(color, size = 14) {
   el.style.background = color;
   el.style.border = "2px solid #0e1613";
   el.style.boxShadow = "0 1px 3px rgba(0,0,0,0.4)";
+  return el;
+}
+
+function iconMarker(icon, color) {
+  const el = document.createElement("div");
+  el.className = "map-icon-marker";
+  el.style.background = color;
+  el.textContent = icon;
   return el;
 }
 
@@ -50,7 +59,7 @@ function emptyFC() {
   return { type: "FeatureCollection", features: [] };
 }
 
-export async function mountMapLibre(container, { config, places, routes, water }) {
+export async function mountMapLibre(container, { config, places, routes, water, food, fuel, accommodation, transport, attractions }) {
   const maplibregl = await import("maplibre-gl");
   await import("maplibre-gl/dist/maplibre-gl.css");
 
@@ -125,24 +134,16 @@ export async function mountMapLibre(container, { config, places, routes, water }
 
     renderRouteSplit(progressMeters);
 
-    for (const p of places) {
-      const marker = new maplibregl.Marker({ element: dotMarker(statusColor(config, p.status)) })
-        .setLngLat(p.coordinates)
-        .addTo(map);
-      const el = marker.getElement();
-      el.style.cursor = "pointer";
-      el.addEventListener("click", (e) => {
+    const markerGroups = buildMarkerGroups({ places, water, food, fuel, accommodation, transport, attractions, routes });
+    for (const m of markerGroups) {
+      if (!m.coordinates) continue;
+      const el = m.kind === "place" ? dotMarker(statusColor(config, m.data.status)) : iconMarker(m.icon, m.color);
+      const marker = new maplibregl.Marker({ element: el }).setLngLat(m.coordinates).addTo(map);
+      const domEl = marker.getElement();
+      domEl.style.cursor = "pointer";
+      domEl.addEventListener("click", (e) => {
         e.stopPropagation();
-        poiClickHandler?.({ kind: "place", data: p });
-      });
-    }
-    for (const w of water?.waterPoints ?? []) {
-      const marker = new maplibregl.Marker({ element: dotMarker("#00A3FF", 10) }).setLngLat(w.coordinates).addTo(map);
-      const el = marker.getElement();
-      el.style.cursor = "pointer";
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
-        poiClickHandler?.({ kind: "water", data: w });
+        poiClickHandler?.({ kind: m.kind, data: m.data });
       });
     }
   });
