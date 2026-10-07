@@ -76,8 +76,8 @@ export async function renderMap(container) {
   container.innerHTML = `
     <div class="map-screen">
       <div id="map-canvas-wrap"></div>
-      <div id="map-fallback-note" class="map-fallback-note" hidden></div>
-      <div id="offtrail-banner" class="offtrail-banner" hidden></div>
+      <div id="map-fallback-note" class="map-fallback-note notice" hidden><span class="notice__text"></span><button class="notice__close" aria-label="${L("Close", "Закрыть")}">&times;</button></div>
+      <div id="offtrail-banner" class="offtrail-banner notice" hidden><span class="notice__text"></span><button class="notice__close" aria-label="${L("Close", "Закрыть")}">&times;</button></div>
 
       <div class="today-widget" id="today-widget">
         <button class="today-widget__header" id="today-widget-toggle">
@@ -123,7 +123,6 @@ export async function renderMap(container) {
       <button class="map-fab map-fab--demo" id="demo-btn">${L("▶ Play Demo", "▶ Демо")}</button>
       <button class="map-fab map-fab--stop-demo" id="demo-stop-btn" hidden>${L("✕ End Demo", "✕ Стоп")}</button>
       <button class="map-fab map-fab--water" id="water-only-btn" aria-pressed="false">💧 ${L("Water only", "Только вода")}</button>
-      <button class="map-fab map-fab--measure" id="measure-fab" aria-pressed="false">📏 ${L("Measure", "Измерить")}</button>
       <button class="map-fab map-fab--gpx" id="gpx-btn" title="${L("Download GPX", "Скачать GPX")}" aria-label="${L("Download GPX", "Скачать GPX")}">GPX</button>
 
       <div id="poi-panel" class="poi-panel" hidden>
@@ -179,7 +178,14 @@ export async function renderMap(container) {
 
   // --- Map + POI panel ---
   const wrap = container.querySelector("#map-canvas-wrap");
-  const fallbackNote = container.querySelector("#map-fallback-note");
+  const fallbackNoteBox = container.querySelector("#map-fallback-note");
+  // Notices: text goes in .notice__text; the × hides the notice (it may come back when its state changes).
+  const fallbackNote = {
+    set textContent(v) { fallbackNoteBox.querySelector(".notice__text").textContent = v; },
+    set innerHTML(v) { fallbackNoteBox.querySelector(".notice__text").innerHTML = v; },
+    set hidden(v) { fallbackNoteBox.hidden = v; },
+  };
+  fallbackNoteBox.querySelector(".notice__close").addEventListener("click", () => { fallbackNoteBox.hidden = true; });
   const demoBtn = container.querySelector("#demo-btn");
   const demoStopBtn = container.querySelector("#demo-stop-btn");
   const poiPanel = container.querySelector("#poi-panel");
@@ -298,39 +304,51 @@ export async function renderMap(container) {
   let gpsOn = false;
   let centeredOnce = false;
   let measureOn = false; // «Измерить» mode (see below); hides the GPS panel while on
+  let gpsPanelDismissed = false;
+  let offTrailDismissed = false;
+  const offTrailText = offTrailBanner.querySelector(".notice__text");
+  offTrailBanner.querySelector(".notice__close").addEventListener("click", () => { offTrailDismissed = true; offTrailBanner.hidden = true; });
+  const closeBtn = () => `<button class="gps-panel__close" data-dismiss aria-label="${L("Close", "Закрыть")}">&times;</button>`;
+  gpsPanel.addEventListener("click", (e) => {
+    if (e.target.closest("[data-dismiss]")) { gpsPanelDismissed = true; gpsPanel.hidden = true; }
+  });
 
   function renderGpsPanel(position, error) {
     if (!gpsOn) { gpsPanel.hidden = true; offTrailBanner.hidden = true; return; }
-    gpsPanel.hidden = measureOn;
+    gpsPanel.hidden = measureOn || gpsPanelDismissed;
     if (error && !position) {
       if (error.code === 1) {
-        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="${L("Close", "Закрыть")}">&times;</button>${GEO_HELP}`;
+        gpsPanel.innerHTML = `<button class="gps-panel__close" data-dismiss aria-label="${L("Close", "Закрыть")}">&times;</button>${GEO_HELP}`;
       } else {
-        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="${L("Close", "Закрыть")}">&times;</button><p>${L("Can't get a location fix", "Не удаётся определить местоположение")}: ${escapeHtml(error.message)}. ${L("Move to open ground and wait.", "Выйдите на открытое место и подождите.")}</p>`;
+        gpsPanel.innerHTML = `<button class="gps-panel__close" data-dismiss aria-label="${L("Close", "Закрыть")}">&times;</button><p>${L("Can't get a location fix", "Не удаётся определить местоположение")}: ${escapeHtml(error.message)}. ${L("Move to open ground and wait.", "Выйдите на открытое место и подождите.")}</p>`;
       }
-      gpsPanel.querySelector(".gps-panel__close").addEventListener("click", () => setGps(false));
       offTrailBanner.hidden = true;
       return;
     }
     if (!position) {
-      gpsPanel.innerHTML = `<p>${L("Finding GPS…", "Ищем GPS…")}</p>`;
+      gpsPanel.innerHTML = `${closeBtn()}<p>${L("Finding GPS…", "Ищем GPS…")}</p>`;
       return;
     }
     const loc = locate(master, [position.lon, position.lat]);
     const acc = `±${Math.round(position.accuracy ?? 0)} ${L("m", "м")}`;
     if (!loc || loc.offTrailM > FAR_AWAY_M) {
       offTrailBanner.hidden = true;
-      gpsPanel.innerHTML = `<p><strong>${L("You are far from the route", "Вы далеко от маршрута")}</strong> — ${formatDist(loc?.offTrailM ?? 0)} ${L("to the trail", "до тропы")}. <span class="gps-panel__acc">${acc}</span></p>`;
+      gpsPanel.innerHTML = `${closeBtn()}<p><strong>${L("You are far from the route", "Вы далеко от маршрута")}</strong> — ${formatDist(loc?.offTrailM ?? 0)} ${L("to the trail", "до тропы")}. <span class="gps-panel__acc">${acc}</span></p>`;
       return;
     }
-    offTrailBanner.hidden = loc.offTrailM <= OFF_TRAIL_M;
-    offTrailBanner.textContent = L(`You are ${Math.round(loc.offTrailM)} m off the trail`, `Вы в ${Math.round(loc.offTrailM)} м от тропы`);
+    if (loc.offTrailM <= OFF_TRAIL_M) offTrailDismissed = false; // back on the trail: warn again next time
+    offTrailBanner.hidden = loc.offTrailM <= OFF_TRAIL_M || offTrailDismissed;
+    offTrailText.textContent = L(`You are ${Math.round(loc.offTrailM)} m off the trail`, `Вы в ${Math.round(loc.offTrailM)} м от тропы`);
+    // Mobile: keep the banner stacked just above the GPS panel.
+    requestAnimationFrame(() => {
+      offTrailBanner.style.bottom = innerWidth < 720 && !gpsPanel.hidden ? `${gpsPanel.getBoundingClientRect().height + 126}px` : "";
+    });
     const day = loc.day ?? master.days.at(-1);
     const toFinish = Math.max(0, day.endM - loc.alongM);
     const route = routeByDay.get(day.dayId);
     const src = nextWaterAhead(waterList, loc.alongM, "source");
     const buy = nextWaterAhead(waterList, loc.alongM, "buy");
-    gpsPanel.innerHTML = `
+    gpsPanel.innerHTML = `${closeBtn()}
       <div class="gps-panel__row"><span>${L("To the day's finish", "До финиша дня")}${route ? ` (${escapeHtml(day.to)})` : ""}</span><strong>${formatDist(toFinish)}</strong></div>
       <div class="gps-panel__row"><span>💧 ${L("Next spring/tap", "Источник впереди")}${src ? ` — ${escapeHtml(src.name)}` : ""}</span><strong>${src ? formatDist(src.alongM - loc.alongM) : "—"}</strong></div>
       <div class="gps-panel__row"><span>🛒 ${L("Buy water", "Купить воду")}${buy ? ` — ${escapeHtml(buy.name)}` : ""}</span><strong>${buy ? formatDist(buy.alongM - loc.alongM) : "—"}</strong></div>
@@ -354,6 +372,7 @@ export async function renderMap(container) {
   }
 
   locateBtn.addEventListener("click", () => {
+    gpsPanelDismissed = false;
     if (!gpsOn) { setGps(true); return; }
     const pos = getLastPosition();
     if (pos && mapApi) mapApi.flyTo([pos.lon, pos.lat]);
@@ -480,15 +499,12 @@ export async function renderMap(container) {
     measureOn = on;
     measureBtn.classList.toggle("map-round-btn--active", on);
     measureBtn.setAttribute("aria-pressed", String(on));
-    measureFab.classList.toggle("map-fab--active", on);
     container.querySelector(".map-screen").classList.toggle("map-screen--measuring", on);
     if (!on) { ptA = ptB = null; waitingGpsForA = false; syncMeasure(); renderGpsPanel(getLastPosition(), null); return; }
     closePoiPanel();
     syncMeasure();
   }
-  const measureFab = container.querySelector("#measure-fab");
   measureBtn.addEventListener("click", () => setMeasure(!measureOn));
-  measureFab.addEventListener("click", () => setMeasure(!measureOn));
 
   mapApi?.setOnMapClick((lngLat) => { if (measureOn) onMeasureTap(lngLat); });
   function onMeasureTap(lngLat) {

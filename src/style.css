@@ -552,3 +552,18 @@ header.app-header { background: var(--bg); }
 .gps-panel { bottom: calc(118px + var(--safe-bottom)); }
 @media (max-width: 719px) { .map-fallback-note { bottom: calc(118px + var(--safe-bottom)); } }
 @media (max-width: 380px) { .segmented__btn { padding: 6px 7px; } }
+
+/* Notices (GPS / measure panels, offline note, off-trail banner): dark grey, 8 px corners, closable */
+.gps-panel, .map-fallback-note, .offtrail-banner {
+  background: var(--surface-2); color: var(--text); border: none; border-radius: 8px;
+}
+.gps-panel__row span, .gps-panel__foot, .gps-panel__acc { color: #C7C7CC; }
+.gps-panel__close, .notice__close {
+  background: rgba(255,255,255,0.14); color: var(--text); border: none; border-radius: 50%;
+  width: 24px; height: 24px; line-height: 1; font-size: 1rem; cursor: pointer; padding: 0; flex: 0 0 auto;
+}
+.notice { display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 12px; }
+.notice[hidden] { display: none; }
+.notice__text { min-width: 0; }
+.offtrail-banner { font-weight: 600; }
+.map-fallback-note { max-width: calc(100% - 24px); }
