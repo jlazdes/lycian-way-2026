@@ -86,16 +86,17 @@
       "name": "Alınca",
       "coordType": "surveyed",
       "coordinates": [
-        29.1431063,
-        36.4477731
+        29.143619,
+        36.446223
       ],
       "confidence": "high",
       "status": "neutral",
-      "lastVerified": "2026-09-23",
+      "lastVerified": "2026-10-07",
       "sources": [
+        "trekkingmania_gpx_2024",
         "osm_place_nodes"
       ],
-      "notes": "OSM place node; replaces earlier low-confidence estimate."
+      "notes": "Village point from the GPX (café, shop, guesthouse)."
     },
     {
       "id": "place-yediburunlar",
@@ -122,16 +123,16 @@
         36.3825194
       ],
       "confidence": "high",
-      "status": "orange",
+      "status": "neutral",
       "lastVerified": "2026-09-23",
       "sources": [
         "osm_place_nodes"
       ],
-      "notes": "OSM place node gives a confident coordinate for this waypoint. Still orange: the onward trail connection from here to Patara could not be reliably reconstructed — see routes.json route-yediburunlar-bel-patara notes."
+      "notes": "On the day 12 route (Yediburunlar → Bel → Patara)."
     },
     {
       "id": "place-patara",
-      "name": "Patara / Gelemiş",
+      "name": "Gelemiş (Patara village)",
       "coordType": "surveyed",
       "coordinates": [
         29.319328,
@@ -160,6 +161,120 @@
         "user_itinerary"
       ],
       "notes": "Coordinate as given in the original itinerary document. Reliability/season not yet independently verified — see water.json."
+    },
+    {
+      "id": "place-trailhead-ovacik",
+      "name": "Lycian Way start (Ovacık)",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.13937,
+        36.56343
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "trekkingmania_gpx_2024"
+      ],
+      "notes": "Official western start of the Lycian Way above Ölüdeniz. Day 9 starts here."
+    },
+    {
+      "id": "place-carrington-suites",
+      "name": "Carrington Suites (hotel)",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.15313,
+        36.57402
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "booking_carrington"
+      ],
+      "notes": "Night of 8→9 Oct."
+    },
+    {
+      "id": "place-g7-yediburunlar",
+      "name": "Yediburunlar — G-7 camping",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.13692,
+        36.40154
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "osm_overpass",
+        "user_itinerary"
+      ],
+      "notes": "Night of 11 Oct. G7 café and G7 market next door (OSM)."
+    },
+    {
+      "id": "place-patara-north",
+      "name": "Patara beach, NW end (Likya Garden Life)",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.22693,
+        36.33204
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "osm_overpass"
+      ],
+      "notes": "Day 12 finish — the circled 'our finish point' in the plan document. Near Gavurağılı / Karadere."
+    },
+    {
+      "id": "place-letoon",
+      "name": "Letoon",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.28848,
+        36.33106
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "trekkingmania_gpx_2024"
+      ],
+      "notes": "Ancient sanctuary, on the day 13 route."
+    },
+    {
+      "id": "place-xanthos",
+      "name": "Xanthos (Kınık)",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.31995,
+        36.3571
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "osm_overpass"
+      ],
+      "notes": "Day 13 walking finish. Ancient Lycian capital, next to Kınık village."
+    },
+    {
+      "id": "place-kas",
+      "name": "Kaş",
+      "coordType": "surveyed",
+      "coordinates": [
+        29.64134,
+        36.19938
+      ],
+      "confidence": "high",
+      "status": "neutral",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "osm_overpass"
+      ],
+      "notes": "14–17 Oct base. No route."
     }
   ]
 }
