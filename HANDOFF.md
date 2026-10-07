@@ -45,7 +45,7 @@ GitHub Pages serves the `gh-pages` branch (the Actions workflow is gitignored �
 ```
 npm run build
 git worktree add ../lw-ghpages gh-pages   # once
-rsync -a --delete --exclude .git dist/ ../lw-ghpages/
+rsync -a --delete --exclude .git dist/ ../lw-ghpages/   # dist contains .nojekyll — required, or Pages hides the .md articles
 cd ../lw-ghpages && git add -A && git commit -m "Deploy: …" && git push origin gh-pages
 ```
 Bump `CACHE_NAME` in `public/sw.js` + `src/lib/offline.js` only if old caches must be dropped.
@@ -65,6 +65,32 @@ Hotel name/address/phone and flight numbers/times are fine. **Note:** git histor
 contains booking codes / names in `data/transport.json`, `data/sources.json`, `data/itinerary.json`
 — rewriting history needs a force-push (not done without approval).
 
-## Not done / open
+## Status (2026-10-07)
 
-See the bottom of this file (updated per release).
+Done and verified on the live URL (desktop + 390 px, offline after warm-up, 0 console errors):
+- P0: cleaned per-day trail with DEM elevations; itinerary 8–18 Oct; hotel/flights; Kabak camps + cafés with
+  Google Maps links; water (OSM sources/taps + "buy" points, two icons, «Только вода», per-day water list with km);
+  «Где я» (km to day finish, next water ahead, «Вы в N м от тропы», permission help iOS/Android);
+  PWA precache + «Скачать карту маршрута» (size up front, progress); GPX export (trk per day + water/lodging wpt).
+- P1: «Измерить» A→Б along our track (distance, gain/loss, Tobler estimate, mini profile, open point in
+  Organic Maps / maps.me / Google Maps); layers Карта / Топо (OpenTopoMap) / Спутник (Esri) — the last two online only.
+- P2: Gaia-style tokens (approved «строго как Gaia»): red teardrop pins, red 3 px trail, black sheets, etc.
+
+Track vs AllTrails (AllTrails shown as the headline everywhere):
+| Day | AllTrails | Our track | Δ |
+|---|---|---|---|
+| 9 Oct | 18.8 km / +807 | 18.4 km / +792 | −2% / −2% |
+| 10 Oct | 6.3 km / +773 | 6.5 km / +804 | +4% / +4% |
+| 11 Oct | 8 km / +349 | 7.5 km / +332 | −6% / −5% |
+| 12 Oct | 16.7 km / +457 | 19.0 km / +553 | +13% / **+21%** |
+| 13 Oct | 13 km (plan) | 11.6 km / +18 | −11% |
+
+Open / not done:
+- Yediburunlar Lighthouse Boutique Hotel — role/date not confirmed, deliberately not added.
+- Topo layer is online-only (OpenTopoMap forbids bulk download); offline = corridor basemap.
+- Dolmuş Adaköy/Gelemiş → Kaş schedule, Kaş → AYT transfer for 18 Oct 04:10 — not researched.
+- OSM springs are unverified for October; cards say so.
+- Phones that opened the old version need to open the app twice online to pick up the new service worker.
+- Pre-existing: Today widget's "Completed" header is visible even when empty (CSS `display:flex` beats `hidden`);
+  left untouched because the widget is out of scope.
+- Git history still contains personal data (see Privacy).
