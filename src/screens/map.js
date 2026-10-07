@@ -80,16 +80,22 @@ export async function renderMap(container) {
       <div id="offtrail-banner" class="offtrail-banner notice" hidden><span class="notice__text"></span><button class="notice__close" aria-label="${L("Close", "Закрыть")}">&times;</button></div>
 
       <div class="today-widget" id="today-widget">
-        <button class="today-widget__header" id="today-widget-toggle">
-          <span>${escapeHtml(today.date)} &middot; ${L("Tasks", "Задачи")}</span>
-          <span class="today-widget__chevron" id="today-widget-chevron">&#8964;</span>
-        </button>
+        <div class="today-widget__top">
+          <button class="today-widget__header" id="today-widget-toggle">
+            <span>${L("Tasks", "Задачи")}</span>
+            <span class="today-widget__chevron" id="today-widget-chevron">&#8964;</span>
+          </button>
+          <button class="today-widget__icon" id="today-full-btn" title="${L("Full screen", "На весь экран")}" aria-label="${L("Full screen", "На весь экран")}" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M4 4h6v2H6v4H4V4Zm10 0h6v6h-2V6h-4V4ZM4 14h2v4h4v2H4v-6Zm14 0h2v6h-6v-2h4v-4Z"/></svg>
+          </button>
+        </div>
+        <div class="today-widget__days">
+          <button class="today-widget__arrow" id="day-prev" aria-label="${L("Previous day", "Предыдущий день")}">&#8249;</button>
+          <span id="day-label"></span>
+          <button class="today-widget__arrow" id="day-next" aria-label="${L("Next day", "Следующий день")}">&#8250;</button>
+        </div>
         <div class="today-widget__body" id="today-widget-body">
-          ${corridorAlerts.length ? `
-            <div class="today-widget__alerts">
-              ${corridorAlerts.map((a) => `<div>${statusBadgeHtml(config, a.status)} ${escapeHtml(a.title)}</div>`).join("")}
-            </div>
-          ` : ""}
+          <div class="today-widget__alerts" id="today-alerts"></div>
           <div class="today-widget__list" id="today-tasks-list"></div>
           <button class="today-widget__add" id="today-add-btn">${L("+ Add item", "+ Добавить")}</button>
           <div class="today-widget__completed-header" id="today-completed-header" hidden>
@@ -97,7 +103,7 @@ export async function renderMap(container) {
             <button id="today-clear-btn" title="${L("Clear completed", "Очистить")}" aria-label="${L("Clear completed", "Очистить")}">🗑</button>
           </div>
           <div class="today-widget__list today-widget__list--completed" id="today-completed-list"></div>
-          <a href="#/itinerary/${today.id}" class="today-widget__full-day">${L("Full day view", "Весь день")} &rarr;</a>
+          <a href="#/itinerary/${today.id}" id="today-full-day" class="today-widget__full-day">${L("Full day view", "Весь день")} &rarr;</a>
         </div>
       </div>
 
@@ -137,7 +143,75 @@ export async function renderMap(container) {
   const completedList = container.querySelector("#today-completed-list");
   const completedHeader = container.querySelector("#today-completed-header");
 
+  // Day paging (‹ date ›) — flip through days without leaving the map.
+  let dayIdx = Math.max(0, days.indexOf(today));
+  const dayLabel = container.querySelector("#day-label");
+  const fullDayLink = container.querySelector("#today-full-day");
+  const fmtDate = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString(L("en-GB", "ru-RU"), { weekday: "short", day: "numeric", month: "short" });
+  function renderDay() {
+    const d = days[dayIdx];
+    dayLabel.textContent = `${fmtDate(d.date)}${d.title ? ` · ${d.title}` : ""}`;
+    dayLabel.title = dayLabel.textContent;
+    fullDayLink.href = `#/itinerary/${d.id}`;
+    container.querySelector("#day-prev").disabled = dayIdx === 0;
+    container.querySelector("#day-next").disabled = dayIdx === days.length - 1;
+    renderChecklist();
+  }
+  container.querySelector("#day-prev").addEventListener("click", () => { if (dayIdx > 0) { dayIdx--; renderDay(); } });
+  container.querySelector("#day-next").addEventListener("click", () => { if (dayIdx < days.length - 1) { dayIdx++; renderDay(); } });
+
+  // Full-screen tasks view.
+  const widget = container.querySelector("#today-widget");
+  const fullBtn = container.querySelector("#today-full-btn");
+  fullBtn.addEventListener("click", () => {
+    const on = !widget.classList.contains("today-widget--full");
+    widget.classList.toggle("today-widget--full", on);
+    fullBtn.setAttribute("aria-pressed", String(on));
+    if (on) { widgetBody.hidden = false; widgetChevron.style.transform = "rotate(0deg)"; }
+  });
+
+  // Corridor alerts: one compact line; "More" expands, × hides (remembered on this device).
+  const ALERT_HIDE_KEY = "lycian-2026-hidden-alerts";
+  const hiddenAlerts = (() => { try { return new Set(JSON.parse(localStorage.getItem(ALERT_HIDE_KEY) ?? "[]")); } catch { return new Set(); } })();
+  const alertsBox = container.querySelector("#today-alerts");
+  function renderAlerts() {
+    const list = corridorAlerts.filter((a) => !hiddenAlerts.has(a.id));
+    alertsBox.hidden = !list.length;
+    alertsBox.innerHTML = list.map((a) => `
+      <div class="today-alert" data-id="${a.id}">
+        <div class="today-alert__row">
+          ${statusBadgeHtml(config, a.status)}
+          <span class="today-alert__title">${escapeHtml(a.title)}</span>
+          <button class="notice__close" data-hide="${a.id}" aria-label="${L("Hide", "Скрыть")}">&times;</button>
+        </div>
+        <div class="today-alert__more" hidden>
+          <p>${escapeHtml(a.description ?? "")}</p>
+          <a href="#/knowledge/safety">${L("Safety notes", "Безопасность")} &rarr;</a>
+        </div>
+        <button class="today-alert__toggle" data-more>${L("More", "Подробнее")}</button>
+      </div>`).join("");
+  }
+  alertsBox.addEventListener("click", (e) => {
+    const hide = e.target.closest("[data-hide]");
+    if (hide) {
+      hiddenAlerts.add(hide.dataset.hide);
+      try { localStorage.setItem(ALERT_HIDE_KEY, JSON.stringify([...hiddenAlerts])); } catch {}
+      renderAlerts();
+      return;
+    }
+    const more = e.target.closest("[data-more]");
+    if (more) {
+      const box = more.closest(".today-alert");
+      const body = box.querySelector(".today-alert__more");
+      body.hidden = !body.hidden;
+      box.classList.toggle("today-alert--open", !body.hidden);
+      more.textContent = body.hidden ? L("More", "Подробнее") : L("Less", "Свернуть");
+    }
+  });
+  renderAlerts();
+
   function renderChecklist() {
+    const today = days[dayIdx];
     const items = getChecklist(today);
     const open = items.filter((i) => !i.done);
     const done = items.filter((i) => i.done);
@@ -155,22 +229,22 @@ export async function renderMap(container) {
       </label>
     `).join("");
     container.querySelectorAll("#today-tasks-list input, #today-completed-list input").forEach((cb) => {
-      cb.addEventListener("change", () => { toggleItem(today, cb.dataset.id); renderChecklist(); });
+      cb.addEventListener("change", () => { toggleItem(days[dayIdx], cb.dataset.id); renderChecklist(); });
     });
   }
-  renderChecklist();
 
   container.querySelector("#today-add-btn").addEventListener("click", () => {
     const text = prompt(L("Add a task", "Новая задача"));
-    if (text && text.trim()) { addItem(today, text.trim()); renderChecklist(); }
+    if (text && text.trim()) { addItem(days[dayIdx], text.trim()); renderChecklist(); }
   });
   container.querySelector("#today-clear-btn").addEventListener("click", () => {
-    clearCompleted(today);
+    clearCompleted(days[dayIdx]);
     renderChecklist();
   });
   const widgetToggle = container.querySelector("#today-widget-toggle");
   const widgetBody = container.querySelector("#today-widget-body");
   const widgetChevron = container.querySelector("#today-widget-chevron");
+  renderDay();
   widgetToggle.addEventListener("click", () => {
     const collapsed = widgetBody.hidden = !widgetBody.hidden;
     widgetChevron.style.transform = collapsed ? "rotate(-90deg)" : "rotate(0deg)";

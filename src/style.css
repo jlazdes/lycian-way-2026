@@ -567,3 +567,29 @@ header.app-header { background: var(--bg); }
 .notice__text { min-width: 0; }
 .offtrail-banner { font-weight: 600; }
 .map-fallback-note { max-width: calc(100% - 24px); }
+
+/* Today widget: day paging, full screen, compact alerts */
+.today-widget__top { display: flex; align-items: center; }
+.today-widget__top .today-widget__header { flex: 1 1 auto; }
+.today-widget__icon { background: none; border: none; color: var(--text-dim); padding: 8px 10px; cursor: pointer; }
+.today-widget__icon[aria-pressed="true"] { color: var(--accent); }
+.today-widget__days { display: flex; align-items: center; gap: 4px; padding: 0 6px 8px; font-size: 0.78rem; font-weight: 600; }
+.today-widget__days span { flex: 1 1 auto; min-width: 0; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.today-widget__arrow { flex: 0 0 auto; width: 28px; height: 28px; border-radius: 8px; border: none; background: var(--surface-2); color: var(--text); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+.today-widget__arrow:disabled { opacity: 0.3; cursor: default; }
+.today-widget--full { top: 0; left: 0; right: 0; bottom: 0; width: auto; max-width: none; border-radius: 0; z-index: 12; display: flex; flex-direction: column; }
+.today-widget--full .today-widget__body { max-height: none; flex: 1 1 auto; }
+.today-widget--full .today-widget__days { font-size: 0.95rem; }
+.today-widget__alerts { padding: 0 0 8px; margin-bottom: 6px; color: var(--text); }
+.today-widget__alerts[hidden] { display: none; }
+.today-alert { background: var(--surface-2); border-radius: 8px; padding: 6px 6px 6px 8px; font-size: 0.72rem; }
+.today-alert__row { display: flex; align-items: center; gap: 6px; }
+.today-alert__row .status-chip { padding: 2px 4px; }
+.today-alert__row .status-chip { font-size: 0; gap: 0; } /* icon only here, the title says the rest */
+.today-alert__title { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #FFC400; }
+.today-alert--open .today-alert__title { white-space: normal; }
+.today-alert__more p { margin: 6px 0; color: #C7C7CC; line-height: 1.35; }
+.today-alert__more a { color: var(--accent); }
+.today-alert__toggle { background: none; border: none; color: var(--accent); font-size: 0.72rem; font-weight: 600; padding: 4px 0 0; cursor: pointer; }
+.today-widget__alerts > .today-alert { display: block; }
+.today-widget__alerts { display: block; border-bottom: none; }
