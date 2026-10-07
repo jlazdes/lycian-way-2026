@@ -1,5 +1,24 @@
 {
   "_comment": "Group uses Jetboil (EN417 / 7-16 screw-thread canisters). No sellers researched yet — this file is schema-only until a fuel research pass is done. sellerConfirmed and canisterStockConfirmed must be tracked separately per spec — never collapse them.",
   "fuelType": "EN417 (7/16-28 UNEF screw-thread) camping gas canister, for Jetboil stoves",
-  "sellers": []
+  "sellers": [
+    {
+      "id": "fuel-mogaz-ovacik",
+      "name": "Mogaz (gas shop, from GPX)",
+      "placeId": "place-trailhead-ovacik",
+      "coordinates": [
+        29.146755,
+        36.572544
+      ],
+      "sellerConfirmed": false,
+      "canisterStockConfirmed": false,
+      "status": "orange",
+      "confidence": "low",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "trekkingmania_gpx_2024"
+      ],
+      "notes": "Waypoint in the 2024 GPX. Unknown whether they stock EN417 screw-thread canisters. Plan: buy gas in Fethiye on 8 Oct."
+    }
+  ]
 }

@@ -5,17 +5,17 @@
       "id": "user_itinerary",
       "level": 5,
       "type": "document",
-      "title": "Lycian voyage 8.10.26.pdf",
-      "description": "Julia's original hand-built itinerary document, including AllTrails links and camp research.",
+      "title": "Lycian voyage 8.10.26 (plan document)",
+      "description": "The group's day-by-day plan (Google Doc export), including AllTrails links, camp/café research and Google Maps links.",
       "url": null,
-      "retrieved": "2026-09-22"
+      "retrieved": "2026-10-07"
     },
     {
       "id": "flight_ajet_confirmation",
       "level": 1,
       "type": "document",
-      "title": "AJet ticket confirmation, reservation 4P2CC6",
-      "description": "Tbilisi-Ankara-Dalaman outbound flights for Aziza Iusupova, Artem Tidva, Iuliia Lazovskaia, 8 Oct 2026.",
+      "title": "AJet e-ticket confirmation (outbound flights)",
+      "description": "Tbilisi → Ankara → Dalaman, 8 Oct 2026: VF616 and VF4070. Personal details deliberately not stored here.",
       "url": null,
       "retrieved": "2026-09-08"
     },
@@ -23,8 +23,8 @@
       "id": "flight_pegasus_confirmation",
       "level": 1,
       "type": "document",
-      "title": "Pegasus/flypgs flight info, reservation 2FA4KA",
-      "description": "Antalya-Tbilisi return flight PC1840 for Iuliia Lazovskaia, 18 Oct 2026.",
+      "title": "Pegasus flight info (return flight)",
+      "description": "Antalya → Tbilisi PC1840, 18 Oct 2026. Personal details deliberately not stored here.",
       "url": null,
       "retrieved": "2026-09-17"
     },
@@ -113,6 +113,50 @@
       "description": "Coordinates for Ovacık, Faralya, Kabak, Alınca, Yediburunlar, Bel, Gelemiş fetched directly from OSM place=* nodes via Overpass, replacing earlier rough estimates.",
       "url": "https://www.openstreetmap.org",
       "retrieved": "2026-09-23"
+    },
+    {
+      "id": "booking_carrington",
+      "level": 1,
+      "type": "document",
+      "title": "Booking.com confirmation — Carrington Suites, Ölüdeniz",
+      "description": "Hotel booking for the night of 8→9 Oct 2026. Personal details and booking number deliberately not stored here.",
+      "url": null,
+      "retrieved": "2026-10-06"
+    },
+    {
+      "id": "trekkingmania_gpx_2024",
+      "level": 4,
+      "type": "gpx",
+      "title": "Lycian Way GPX (trekkingmania, 2024)",
+      "description": "Third-party recording of the whole Lycian Way. Cleaned at build time (scripts/build-trail.mjs): split at gaps, corridor Ovacık→Xanthos only, cut per day.",
+      "url": "https://trekkingmania.ru",
+      "retrieved": "2026-10-06"
+    },
+    {
+      "id": "osm_overpass",
+      "level": 3,
+      "type": "web",
+      "title": "OpenStreetMap via Overpass API",
+      "description": "Springs, drinking water, taps, shops and cafés near the trail, fetched at build time. © OpenStreetMap contributors (ODbL).",
+      "url": "https://www.openstreetmap.org",
+      "retrieved": "2026-10-07"
+    },
+    {
+      "id": "plan_google_maps",
+      "level": 5,
+      "type": "web",
+      "title": "Google Maps links from the plan document",
+      "description": "Coordinates of cafés and Kabak camps resolved from the plan document's Google Maps links.",
+      "url": null,
+      "retrieved": "2026-10-07"
+    },
+    {
+      "id": "alltrails_kabak_paradise_beach",
+      "level": 5,
+      "type": "web",
+      "title": "AllTrails: Kabak – Paradise Beach [CLOSED]",
+      "url": "https://www.alltrails.com",
+      "retrieved": "2026-09-22"
     }
   ]
 }

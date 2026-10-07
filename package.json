@@ -14,6 +14,8 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
-    "maplibre-gl": "^6.10.0"
+    "@protomaps/basemaps": "^5.7.2",
+    "maplibre-gl": "^6.10.0",
+    "pmtiles": "^4.5.0"
   }
 }

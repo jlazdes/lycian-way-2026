@@ -1,53 +1,165 @@
 {
-  "_comment": "Camps/accommodation named in the original itinerary. Prices are as reported in reviews the user read — not independently confirmed.",
+  "_comment": "Where we sleep, plus alternatives named in the plan document. Prices are second-hand (reviews) unless stated.",
   "accommodations": [
     {
-      "id": "accom-secret-garden-camp",
-      "name": "Secret Garden Camp",
-      "placeId": "place-kabak",
-      "type": "camp",
-      "priceInfo": "~150 TRY/person/night per reviews cited in user's research",
-      "status": "orange",
-      "confidence": "low",
-      "lastVerified": "2026-09-22",
-      "sources": ["user_itinerary"],
-      "notes": "Price is a secondhand report from reviews, not confirmed with the camp directly."
+      "id": "accom-carrington-suites",
+      "name": "Carrington Suites",
+      "placeId": "place-carrington-suites",
+      "coordinates": [
+        29.15313,
+        36.57402
+      ],
+      "type": "hotel",
+      "booked": true,
+      "nights": [
+        "2026-10-08"
+      ],
+      "address": "Ölüdeniz Mah. 84 Sok. No 10, 48340 Ölüdeniz",
+      "phone": "+90 544 347 67 87",
+      "checkIn": "8 Oct, 15:00–00:00",
+      "checkOut": "9 Oct, 07:00–11:00",
+      "priceInfo": "Booked — breakfast included",
+      "status": "neutral",
+      "confidence": "high",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "booking_carrington"
+      ],
+      "notes": "King Suite, 3 adults. Non-refundable."
     },
     {
       "id": "accom-kabak-famous-camping",
       "name": "Kabak Famous Camping",
       "placeId": "place-kabak",
+      "coordinates": [
+        29.126847,
+        36.4615189
+      ],
+      "googleMapsUrl": "https://maps.app.goo.gl/XgAvZwj4jFcYwt9E9",
       "type": "camp",
-      "priceInfo": "~600 TRY/person per reviews cited in user's research",
-      "status": "orange",
+      "nights": [
+        "2026-10-09"
+      ],
+      "priceInfo": "~600 TL/person (reviews)",
+      "status": "neutral",
       "confidence": "low",
-      "lastVerified": "2026-09-22",
-      "sources": ["user_itinerary"],
-      "notes": "Flagged by Julia as pricier than the alternatives."
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "plan_google_maps"
+      ],
+      "notes": "Pricier than the alternatives."
     },
     {
       "id": "accom-kabak-lost-camping",
       "name": "Kabak Lost Camping",
       "placeId": "place-kabak",
+      "coordinates": [
+        29.12995,
+        36.4617502
+      ],
+      "googleMapsUrl": "https://maps.app.goo.gl/f8we89qtz7r5TAWN9",
       "type": "camp",
-      "priceInfo": "unknown",
-      "status": "orange",
+      "nights": [
+        "2026-10-09"
+      ],
+      "priceInfo": "price unknown",
+      "status": "neutral",
       "confidence": "low",
-      "lastVerified": "2026-09-22",
-      "sources": ["user_itinerary"],
-      "notes": "Price not found during original research."
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "plan_google_maps"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "accom-gokdeniz-camping",
+      "name": "Gökdeniz Camping",
+      "placeId": "place-kabak",
+      "coordinates": [
+        29.1268363,
+        36.4621167
+      ],
+      "googleMapsUrl": "https://maps.app.goo.gl/yu6Gs7ZMJ3fLZWuW7",
+      "type": "camp",
+      "nights": [
+        "2026-10-09"
+      ],
+      "priceInfo": "price unknown",
+      "status": "neutral",
+      "confidence": "low",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "plan_google_maps"
+      ],
+      "notes": "Recommended by Secret Garden on the phone."
+    },
+    {
+      "id": "accom-secret-garden-camp",
+      "name": "Secret Garden Camp — CLOSED",
+      "placeId": "place-kabak",
+      "coordinates": [
+        29.1259456,
+        36.4609286
+      ],
+      "googleMapsUrl": "https://maps.app.goo.gl/Ba6s6YHPHR7tc4KR9",
+      "type": "camp",
+      "nights": [],
+      "priceInfo": "closed",
+      "status": "red",
+      "confidence": "high",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "plan_google_maps"
+      ],
+      "notes": "Said on the phone they are closed; they recommend Gökdeniz Camping."
+    },
+    {
+      "id": "accom-g7-camping",
+      "name": "G-7 camping (Yediburunlar)",
+      "placeId": "place-g7-yediburunlar",
+      "coordinates": [
+        29.13692,
+        36.40154
+      ],
+      "type": "camp",
+      "nights": [
+        "2026-10-11"
+      ],
+      "priceInfo": "price unknown",
+      "status": "neutral",
+      "confidence": "medium",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "osm_overpass"
+      ],
+      "notes": "Planned night 11 Oct. Rooms + café; G7 market next door (OSM)."
     },
     {
       "id": "accom-patara-camps-cluster",
-      "name": "Patara-area camp cluster (Çeyrek Camping & Bungalows, Super Campground, Patara Caravan Camping, Medusa Bar & Camping, and others)",
-      "placeId": "place-patara",
+      "name": "Patara beach camps (Likya Garden Life, Patara Green Park and others)",
+      "placeId": "place-patara-north",
+      "coordinates": [
+        29.22693,
+        36.33204
+      ],
       "type": "camp",
-      "priceInfo": "varies — not itemized",
+      "nights": [
+        "2026-10-12"
+      ],
+      "priceInfo": "varies",
       "status": "orange",
       "confidence": "low",
-      "lastVerified": "2026-09-22",
-      "sources": ["user_itinerary"],
-      "notes": "Original document shows several camps clustered near the Patara ruins entrance and near the finish point on Patara beach, via a Google Maps screenshot, without a single chosen pick."
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "osm_overpass"
+      ],
+      "notes": "The plan marks this area as the 12 Oct finish. Google Maps showed Patara Green Park as 'temporarily closed' — check on arrival."
     }
   ]
 }

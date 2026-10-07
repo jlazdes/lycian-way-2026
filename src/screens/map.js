@@ -1,17 +1,21 @@
 import {
   getConfig, getPlaces, getRoutes, getWater, getAttractions, getAlerts, getSourceById,
-  getFood, getFuel, getAccommodation, getTransport, getItinerary,
+  getFood, getFuel, getAccommodation, getTransport, getItinerary, getTrail, getPois,
 } from "../lib/data.js";
 import { renderOfflineMap } from "../lib/offlineMap.js";
-import { subscribeGps, startGps, getLastPosition, configureGps } from "../lib/gps.js";
+import { subscribeGps, startGps, stopGps, getLastPosition, configureGps } from "../lib/gps.js";
 import { buildGpx, downloadGpx } from "../lib/gpx.js";
 import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
 import { getChecklist, addItem, toggleItem, clearCompleted } from "../lib/checklist.js";
+import { buildMaster, locate, waterAlongTrail, nextWaterAhead, formatKm, formatDist } from "../lib/trail.js";
 
 const KIND_LABEL = {
-  place: "Waypoint", water: "Water", food: "Food / resupply", sleep: "Sleep",
-  transport: "Transport", attraction: "Place to see", hazard: "Watch out",
+  place: "Waypoint", source: "Вода: источник", buy: "Вода: купить", food: "Food / resupply", sleep: "Sleep",
+  transport: "Transport", attraction: "Place to see", hazard: "Watch out", fuel: "Gas", gpx: "Точка из GPX",
 };
+const GPS_PREF_KEY = "lycian-2026-gps-on";
+const OFF_TRAIL_M = 100;
+const FAR_AWAY_M = 5000;
 
 function todaysDay(days, config) {
   const today = new Date().toISOString().slice(0, 10);
@@ -27,21 +31,45 @@ function waterVisualStatus(waterStatus) {
   return "orange";
 }
 
+function readPref() {
+  try { return localStorage.getItem(GPS_PREF_KEY) === "1"; } catch { return false; }
+}
+function writePref(on) {
+  try { localStorage.setItem(GPS_PREF_KEY, on ? "1" : "0"); } catch {}
+}
+
+const GEO_HELP = `
+  <p><strong>Доступ к геолокации запрещён.</strong> Как включить:</p>
+  <p><strong>iPhone (Safari или иконка на главном экране):</strong> Настройки → Конфиденциальность и безопасность → Службы геолокации → включить; ниже «Сайты Safari» → «При использовании». Затем в Safari: «аА» в адресной строке → Настройки веб-сайта → Геопозиция → Разрешить. Перезагрузите страницу.</p>
+  <p><strong>Android (Chrome):</strong> опустите шторку и включите «Местоположение». В Chrome: ⋮ → Настройки → Настройки сайтов → Геоданные → разрешить для jlazdes.github.io (или значок замка слева от адреса → Разрешения → Геоданные). Перезагрузите страницу.</p>
+  <p style="color:var(--text-dim);font-size:0.75rem;">GPS работает и без интернета — нужен только доступ к геолокации.</p>
+`;
+
 export async function renderMap(container) {
-  const [config, places, routes, water, attractions, alerts, food, fuel, accommodation, transport, days] = await Promise.all([
+  const [config, places, routes, water, attractions, alerts, food, fuel, accommodation, transport, days, trail, pois] = await Promise.all([
     getConfig(), getPlaces(), getRoutes(), getWater(), getAttractions(), getAlerts(),
-    getFood(), getFuel(), getAccommodation(), getTransport(), getItinerary(),
+    getFood(), getFuel(), getAccommodation(), getTransport(), getItinerary(), getTrail(), getPois(),
   ]);
   configureGps(config.gps);
 
-  const liveTilesAvailable = navigator.onLine && Boolean(config.map.tileProvider.styleUrl);
+  const master = buildMaster(trail);
+  const waterList = waterAlongTrail(master, { pois, water, food });
+  const placeById = new Map(places.map((p) => [p.id, p]));
+  const routeByDay = new Map(routes.map((r) => [r.dayId, r]));
+  const dayById = new Map(days.map((d) => [d.id, d]));
+  const transportLines = [];
+  if (placeById.get("place-xanthos") && placeById.get("place-kas")) {
+    transportLines.push({ id: "transport-dolmus-xanthos-kas", coordinates: [placeById.get("place-xanthos").coordinates, placeById.get("place-kas").coordinates] });
+  }
+
   const today = todaysDay(days, config);
   const corridorAlerts = alerts.filter((a) => !a.affects?.routeIds?.length); // no single point -> banner, not a pin
 
   container.innerHTML = `
     <div class="map-screen">
       <div id="map-canvas-wrap"></div>
-      <div id="map-fallback-note" class="map-fallback-note" hidden>Offline corridor view — no live map tiles right now.</div>
+      <div id="map-fallback-note" class="map-fallback-note" hidden></div>
+      <div id="offtrail-banner" class="offtrail-banner" hidden></div>
 
       <div class="today-widget" id="today-widget">
         <button class="today-widget__header" id="today-widget-toggle">
@@ -65,9 +93,16 @@ export async function renderMap(container) {
         </div>
       </div>
 
+      <button class="map-round-btn" id="locate-btn" title="Где я" aria-label="Где я" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 3h-2.07A7 7 0 0 0 13 5.07V3h-2v2.07A7 7 0 0 0 5.07 11H3v2h2.07A7 7 0 0 0 11 18.93V21h2v-2.07A7 7 0 0 0 18.93 13H21v-2Zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>
+      </button>
+
+      <div id="gps-panel" class="gps-panel" hidden></div>
+
       <button class="map-fab map-fab--demo" id="demo-btn">▶ Play Demo</button>
       <button class="map-fab map-fab--stop-demo" id="demo-stop-btn" hidden>✕ End Demo</button>
-      <button class="map-fab map-fab--gpx" id="gpx-btn" title="Download GPX" aria-label="Download GPX">GPX</button>
+      <button class="map-fab map-fab--water" id="water-only-btn" aria-pressed="false">💧 Только вода</button>
+      <button class="map-fab map-fab--gpx" id="gpx-btn" title="Скачать GPX" aria-label="Скачать GPX">GPX</button>
 
       <div id="poi-panel" class="poi-panel" hidden>
         <button class="poi-panel__close" id="poi-close-btn" aria-label="Close">&times;</button>
@@ -129,41 +164,74 @@ export async function renderMap(container) {
   const poiPanelBody = container.querySelector("#poi-panel-body");
   const poiCloseBtn = container.querySelector("#poi-close-btn");
 
-  async function renderPoiPanel({ kind, data }) {
-    const name = data.name;
-    let status = data.status;
-    if (kind === "water") status = waterVisualStatus(data.status);
-    const confidence = data.confidence;
-    const lastVerified = data.lastVerified;
-    const coords = data.coordinates ?? null;
-    const sources = await Promise.all((data.sources ?? []).map((id) => getSourceById(id)));
+  function trailPositionLine(coords) {
+    const loc = locate(master, coords);
+    if (!loc || loc.offTrailM > 3000) return "";
+    const day = loc.day;
+    const dayInfo = day ? `${escapeHtml(dayById.get(day.dayId)?.date ?? "")}: ${formatKm(loc.alongM - day.startM)} км от старта дня` : "";
+    return `<p class="poi-panel__meta">${dayInfo}${loc.offTrailM > 30 ? ` &middot; ${Math.round(loc.offTrailM)} м от тропы` : " &middot; на тропе"}</p>`;
+  }
 
+  function mapsLinks(coords, gmapsUrl) {
+    const [lon, lat] = coords;
+    return `<div class="link-row">
+      <a class="btn" target="_blank" rel="noopener" href="${gmapsUrl ?? `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`}">Google Maps</a>
+      <a class="btn btn-secondary" href="om://map?ll=${lat},${lon}&n=1">Organic Maps</a>
+      <a class="btn btn-secondary" href="mapsme://map?ll=${lat},${lon}&n=1">maps.me</a>
+    </div>`;
+  }
+
+  async function renderPoiPanel({ kind, data }) {
+    const coords = data.coordinates ?? null;
+    let status = data.status;
     let bodyExtra = "";
-    if (kind === "water") {
-      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.waterType)} &middot; treatment: ${escapeHtml(data.treatment)}</p>`;
+    if (kind === "source") {
+      status = data.curated ? waterVisualStatus("uncertain") : "orange";
+      bodyExtra = `
+        <p class="poi-panel__category">${escapeHtml(data.osmType ?? "spring")}${data.osm ? ` &middot; <a href="https://www.openstreetmap.org/${data.osm}" target="_blank" rel="noopener">OSM</a>` : ""}</p>
+        <p class="poi-warning">В октябре может быть сухим, не рассчитывать как на единственный.</p>
+        ${data.notes ? `<p>${escapeHtml(data.notes)}</p>` : ""}`;
+    } else if (kind === "buy") {
+      status = "neutral";
+      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.osmType ?? "")}${data.osm ? ` &middot; <a href="https://www.openstreetmap.org/${data.osm}" target="_blank" rel="noopener">OSM</a>` : ""}</p>
+        <p>Купить воду — надёжно (магазин / кафе). Часы работы не проверены.</p>`;
     } else if (kind === "food") {
-      bodyExtra = `<p class="poi-panel__category">${data.isFuel ? "fuel" : escapeHtml(data.category ?? "food")}</p>`;
+      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.category ?? "food")}</p>`;
+    } else if (kind === "fuel") {
+      bodyExtra = `<p class="poi-panel__category">gas &middot; stock of EN417 canisters ${data.canisterStockConfirmed ? "confirmed" : "not confirmed"}</p>`;
     } else if (kind === "sleep") {
-      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.type ?? "camp")}</p><p>${escapeHtml(data.priceInfo ?? "")}</p>`;
+      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.type ?? "camp")}${data.booked ? " &middot; <strong>забронировано</strong>" : ""}</p>
+        ${data.address ? `<p>${escapeHtml(data.address)}</p>` : ""}
+        ${data.phone ? `<p><a href="tel:${data.phone.replace(/\s/g, "")}">${escapeHtml(data.phone)}</a></p>` : ""}
+        ${data.checkIn ? `<p>Заезд: ${escapeHtml(data.checkIn)}<br>Выезд: ${escapeHtml(data.checkOut ?? "")}</p>` : ""}
+        <p>${escapeHtml(data.priceInfo ?? "")}</p>`;
     } else if (kind === "transport") {
-      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.mode ?? "transport")}</p>${data.date ? `<p>${escapeHtml(data.date)}</p>` : ""}`;
+      const segs = data.details?.segments ?? (data.details?.flightNo ? [data.details] : []);
+      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.mode ?? "transport")}${data.date ? ` &middot; ${escapeHtml(data.date)}` : ""}</p>
+        ${segs.map((s) => `<p><strong>${escapeHtml(s.flightNo)}</strong> ${escapeHtml(s.from)} ${escapeHtml(s.depart)} → ${escapeHtml(s.to)} ${escapeHtml(s.arrive)}</p>`).join("")}`;
     } else if (kind === "attraction") {
       const learnMore = data.category === "ruins" ? `<a href="#/knowledge/ancient-lycia">More on Ancient Lycia &rarr;</a>` : "";
       bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.category)}</p><p>${escapeHtml(data.shortDescription ?? "")}</p>${learnMore ? `<p>${learnMore}</p>` : ""}`;
     } else if (kind === "hazard") {
-      bodyExtra = `<p><a href="#/knowledge/route-decisions">More on this open question &rarr;</a> &middot; <a href="#/knowledge/safety">Safety notes &rarr;</a></p>`;
+      bodyExtra = `<p><a href="#/knowledge/route-decisions">More on route decisions &rarr;</a> &middot; <a href="#/knowledge/safety">Safety notes &rarr;</a></p>`;
+    } else if (kind === "gpx") {
+      status = "neutral";
+      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.categoryLabel)}</p><p style="color:var(--text-dim);font-size:0.75rem;">Из GPX trekkingmania (2024) — может быть устаревшим.</p>`;
     }
+    const sources = await Promise.all((data.sources ?? []).map((id) => getSourceById(id)));
+    const anchor = coords ?? placeById.get(data.placeId)?.coordinates;
 
     poiPanelBody.innerHTML = `
-      <div class="pill-row">${statusBadgeHtml(config, status)}<span class="pill">${escapeHtml(KIND_LABEL[kind] ?? kind)}</span></div>
-      <h3>${escapeHtml(name)}</h3>
+      <div class="pill-row">${statusBadgeHtml(config, status ?? "neutral")}<span class="pill">${escapeHtml(KIND_LABEL[kind] ?? kind)}</span></div>
+      <h3>${escapeHtml(data.name)}</h3>
+      ${anchor ? trailPositionLine(anchor) : ""}
       ${bodyExtra}
-      ${data.notes ? `<p>${escapeHtml(data.notes)}</p>` : ""}
-      <p style="font-size:0.75rem;color:var(--text-dim);">Confidence: ${escapeHtml(confidence ?? "?")}${lastVerified ? ` &middot; last verified ${escapeHtml(lastVerified)}` : ""}</p>
-      ${sources.length ? `<div class="section-title">Sources</div>${sources.filter(Boolean).map((s) => s.url
+      ${data.notes && kind !== "source" ? `<p>${escapeHtml(data.notes)}</p>` : ""}
+      ${data.confidence ? `<p style="font-size:0.75rem;color:var(--text-dim);">Confidence: ${escapeHtml(data.confidence)}${data.lastVerified ? ` &middot; last verified ${escapeHtml(data.lastVerified)}` : ""}</p>` : ""}
+      ${sources.filter(Boolean).length ? `<div class="section-title">Sources</div>${sources.filter(Boolean).map((s) => s.url
         ? `<p><a href="${s.url}" target="_blank" rel="noopener">${escapeHtml(s.title)}</a></p>`
         : `<p>${escapeHtml(s.title)}</p>`).join("")}` : ""}
-      ${coords ? `<div class="link-row"><a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${coords[1]},${coords[0]}">Open in Google Maps</a></div>` : ""}
+      ${anchor ? mapsLinks(anchor, data.googleMapsUrl) : ""}
     `;
     poiPanel.hidden = false;
   }
@@ -171,37 +239,122 @@ export async function renderMap(container) {
   function closePoiPanel() { poiPanel.hidden = true; }
   poiCloseBtn.addEventListener("click", closePoiPanel);
 
-  async function drawOffline() {
+  function drawFallback() {
+    fallbackNote.textContent = "Упрощённая схема — карта не запустилась на этом устройстве.";
     fallbackNote.hidden = false;
-    renderOfflineMap(wrap, { config, places, routes, water, gpsPosition: getLastPosition() });
+    renderOfflineMap(wrap, { config, places, master, waterList, gpsPosition: getLastPosition() });
   }
 
   let mapApi = null;
-  if (liveTilesAvailable) {
-    try {
-      const { mountMapLibre } = await import("../lib/map.js");
-      wrap.innerHTML = `<div id="maplibre-container" style="width:100%;height:100%;"></div>`;
-      mapApi = await mountMapLibre(wrap.querySelector("#maplibre-container"), {
-        config, places, routes, water, food, fuel, accommodation, transport, attractions,
-      });
-      mapApi.setOnPoiClick(renderPoiPanel);
-    } catch (e) {
-      console.warn("MapLibre failed to load, falling back to offline corridor view", e);
-      await drawOffline();
+  try {
+    const { mountMapLibre } = await import("../lib/map.js");
+    wrap.innerHTML = `<div id="maplibre-container" style="width:100%;height:100%;"></div>`;
+    mapApi = await mountMapLibre(wrap.querySelector("#maplibre-container"), {
+      config, places, routes, food, fuel, accommodation, transport, attractions, master, waterList, pois, transportLines,
+    });
+    mapApi.setOnPoiClick(renderPoiPanel);
+    if (mapApi.mode === "offline-map") {
+      fallbackNote.textContent = "Офлайн: карта коридора ±2 км";
+      fallbackNote.hidden = false;
+    } else if (mapApi.mode === "offline-blank") {
+      fallbackNote.innerHTML = `Офлайн — подложка не скачана. Трек и точки работают. <a href="#/knowledge">Скачать карту</a>`;
+      fallbackNote.hidden = false;
     }
-  } else {
-    await drawOffline();
+  } catch (e) {
+    console.warn("MapLibre failed to load, falling back to the SVG corridor view", e);
+    drawFallback();
   }
 
-  subscribeGps(({ position }) => {
-    if (mapApi && position) mapApi.setGpsPosition(position);
-    else if (!liveTilesAvailable) drawOffline();
-  });
-  startGps();
+  // --- "Где я": GPS on demand ---
+  const locateBtn = container.querySelector("#locate-btn");
+  const gpsPanel = container.querySelector("#gps-panel");
+  const offTrailBanner = container.querySelector("#offtrail-banner");
+  let gpsOn = false;
+  let centeredOnce = false;
 
+  function renderGpsPanel(position, error) {
+    if (!gpsOn) { gpsPanel.hidden = true; offTrailBanner.hidden = true; return; }
+    gpsPanel.hidden = false;
+    if (error && !position) {
+      if (error.code === 1) {
+        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="Закрыть">&times;</button>${GEO_HELP}`;
+      } else {
+        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="Закрыть">&times;</button><p>Не удаётся определить местоположение: ${escapeHtml(error.message)}. Выйдите на открытое место и подождите.</p>`;
+      }
+      gpsPanel.querySelector(".gps-panel__close").addEventListener("click", () => setGps(false));
+      offTrailBanner.hidden = true;
+      return;
+    }
+    if (!position) {
+      gpsPanel.innerHTML = `<p>Ищем GPS…</p>`;
+      return;
+    }
+    const loc = locate(master, [position.lon, position.lat]);
+    const acc = `±${Math.round(position.accuracy ?? 0)} м`;
+    if (!loc || loc.offTrailM > FAR_AWAY_M) {
+      offTrailBanner.hidden = true;
+      gpsPanel.innerHTML = `<p><strong>Вы далеко от маршрута</strong> — ${formatKm(loc?.offTrailM ?? 0)} км до тропы. <span class="gps-panel__acc">${acc}</span></p>`;
+      return;
+    }
+    offTrailBanner.hidden = loc.offTrailM <= OFF_TRAIL_M;
+    offTrailBanner.textContent = `Вы в ${Math.round(loc.offTrailM)} м от тропы`;
+    const day = loc.day ?? master.days.at(-1);
+    const toFinish = Math.max(0, day.endM - loc.alongM);
+    const route = routeByDay.get(day.dayId);
+    const src = nextWaterAhead(waterList, loc.alongM, "source");
+    const buy = nextWaterAhead(waterList, loc.alongM, "buy");
+    gpsPanel.innerHTML = `
+      <div class="gps-panel__row"><span>До финиша дня${route ? ` (${escapeHtml(day.to)})` : ""}</span><strong>${formatDist(toFinish)}</strong></div>
+      <div class="gps-panel__row"><span>💧 Источник впереди${src ? ` — ${escapeHtml(src.name)}` : ""}</span><strong>${src ? formatDist(src.alongM - loc.alongM) : "—"}</strong></div>
+      <div class="gps-panel__row"><span>🛒 Купить воду${buy ? ` — ${escapeHtml(buy.name)}` : ""}</span><strong>${buy ? formatDist(buy.alongM - loc.alongM) : "—"}</strong></div>
+      <div class="gps-panel__foot">по тропе &middot; точность ${acc}</div>
+    `;
+  }
+
+  function setGps(on) {
+    gpsOn = on;
+    writePref(on);
+    locateBtn.classList.toggle("map-round-btn--active", on);
+    locateBtn.setAttribute("aria-pressed", String(on));
+    if (on) {
+      centeredOnce = false;
+      startGps();
+      renderGpsPanel(getLastPosition(), null);
+    } else {
+      stopGps();
+      renderGpsPanel(null, null);
+    }
+  }
+
+  locateBtn.addEventListener("click", () => {
+    if (!gpsOn) { setGps(true); return; }
+    const pos = getLastPosition();
+    if (pos && mapApi) mapApi.flyTo([pos.lon, pos.lat]);
+    else setGps(false);
+  });
+
+  subscribeGps(({ position, error }) => {
+    if (!gpsOn) return;
+    if (position && mapApi) {
+      mapApi.setGpsPosition(position);
+      if (!centeredOnce) { centeredOnce = true; mapApi.flyTo([position.lon, position.lat], 14); }
+    }
+    renderGpsPanel(position, error);
+  });
+  if (readPref()) setGps(true);
+
+  // --- Только вода ---
+  const waterBtn = container.querySelector("#water-only-btn");
+  waterBtn.addEventListener("click", () => {
+    const on = waterBtn.getAttribute("aria-pressed") !== "true";
+    waterBtn.setAttribute("aria-pressed", String(on));
+    waterBtn.classList.toggle("map-fab--active", on);
+    mapApi?.setWaterOnly(on);
+  });
+
+  // --- GPX export ---
   container.querySelector("#gpx-btn").addEventListener("click", () => {
-    const xml = buildGpx({ places, routes, water, attractions, alerts });
-    downloadGpx(xml);
+    downloadGpx(buildGpx({ trail, itinerary: days, routes, waterList, accommodation }));
   });
 
   if (mapApi) {

@@ -36,6 +36,7 @@ function flushPending() {
 
 export function startGps() {
   if (watchId !== null) return;
+  lastError = null;
   if (!("geolocation" in navigator)) {
     lastError = { code: "unsupported", message: "Geolocation not supported in this browser." };
     notify();

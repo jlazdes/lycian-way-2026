@@ -1,7 +1,7 @@
 {
   "appVersion": "0.1.0",
-  "dataVersion": "2026-09-22",
-  "cacheVersion": "lycian-2026-v1",
+  "dataVersion": "2026-10-07",
+  "cacheVersion": "lycian-2026-v2",
   "trip": {
     "name": "Lycian Way 2026",
     "startDate": "2026-10-08",
@@ -9,9 +9,18 @@
   },
   "group": {
     "members": [
-      { "id": "julia", "name": "Julia" },
-      { "id": "aziza", "name": "Aziza" },
-      { "id": "artem", "name": "Artem" }
+      {
+        "id": "julia",
+        "name": "Julia"
+      },
+      {
+        "id": "aziza",
+        "name": "Aziza"
+      },
+      {
+        "id": "artem",
+        "name": "Artem"
+      }
     ]
   },
   "water": {
@@ -19,22 +28,39 @@
   },
   "map": {
     "boundingBox": {
-      "note": "Trip corridor only: Dalaman/Olu Deniz to Patara/Gelemis. Widen only if itinerary days 14-18 extend it.",
+      "note": "Trip corridor: Dalaman/Ölüdeniz to Xanthos, plus Kaş (14–17 Oct).",
       "west": 28.75,
-      "south": 36.20,
-      "east": 29.45,
+      "south": 36.15,
+      "east": 29.72,
       "north": 36.75
     },
     "tileProvider": {
       "note": "Swappable — do not hardcode this provider elsewhere in the app. lib/map.js reads this value. OpenFreeMap is free, no API key, no usage cap as of writing.",
       "styleUrl": "https://tiles.openfreemap.org/styles/positron"
+    },
+    "offline": {
+      "note": "Self-hosted Protomaps corridor extract (see scripts/build-offline-map.mjs). Used when the device is offline; never bulk-cache the online provider.",
+      "manifestUrl": "offline/manifest.json",
+      "pmtilesUrl": "offline/corridor.pmtiles"
     }
   },
   "status": {
-    "neutral": { "color": "#AAAAAA", "label": "Verified / current" },
-    "orange": { "color": "#FF8800", "label": "Uncertain / needs checking" },
-    "yellow": { "color": "#FFEE00", "label": "Partially confirmed issue" },
-    "red": { "color": "#FF0000", "label": "Confirmed closed / unavailable" }
+    "neutral": {
+      "color": "#AAAAAA",
+      "label": "Verified / current"
+    },
+    "orange": {
+      "color": "#FF8800",
+      "label": "Uncertain / needs checking"
+    },
+    "yellow": {
+      "color": "#FFEE00",
+      "label": "Partially confirmed issue"
+    },
+    "red": {
+      "color": "#FF0000",
+      "label": "Confirmed closed / unavailable"
+    }
   },
   "routeProgress": {
     "note": "Colors for the route line itself: gray for not-yet-walked, green for the portion behind the live GPS position (or the demo playhead).",

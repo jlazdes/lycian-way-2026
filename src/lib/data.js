@@ -29,6 +29,8 @@ export const getTransport = () => loadJson("transport").then((d) => d.transportL
 export const getAlerts = () => loadJson("alerts").then((d) => d.alerts);
 export const getAttractions = () => loadJson("attractions").then((d) => d.attractions);
 export const getSources = () => loadJson("sources").then((d) => d.sources);
+export const getTrail = () => loadJson("trail");
+export const getPois = () => loadJson("pois");
 
 const sourceIndexPromise = getSources().then((list) => {
   const map = new Map();

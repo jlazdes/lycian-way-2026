@@ -23,13 +23,33 @@ function save(dayId, items) {
 
 let nextId = 1;
 
+// Seed texts already offered for a day, so tasks added to /data later still
+// show up on devices that seeded the list earlier (without re-adding ones the
+// user deleted or duplicating ones they have).
+function loadSeeded(dayId) {
+  try { return new Set(JSON.parse(localStorage.getItem(`${STORAGE_PREFIX}${dayId}-seeded`) ?? "null") ?? []); } catch { return null; }
+}
+function saveSeeded(dayId, set) {
+  try { localStorage.setItem(`${STORAGE_PREFIX}${dayId}-seeded`, JSON.stringify([...set])); } catch {}
+}
+
 export function getChecklist(day) {
+  const seed = [...(day.preTripTasks ?? []), ...(day.tasks ?? [])];
   let items = load(day.id);
   if (!items) {
-    const seed = [...(day.preTripTasks ?? []), ...(day.tasks ?? [])];
     items = seed.map((text) => ({ id: `seed-${nextId++}`, text, done: false }));
     save(day.id, items);
+    saveSeeded(day.id, new Set(seed));
+    return items;
   }
+  const seeded = loadSeeded(day.id) ?? new Set(items.map((i) => i.text));
+  const fresh = seed.filter((text) => !seeded.has(text) && !items.some((i) => i.text === text));
+  if (fresh.length) {
+    items.push(...fresh.map((text) => ({ id: `seed-${Date.now()}-${nextId++}`, text, done: false })));
+    save(day.id, items);
+  }
+  seed.forEach((t) => seeded.add(t));
+  saveSeeded(day.id, seeded);
   return items;
 }
 

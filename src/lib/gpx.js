@@ -1,30 +1,41 @@
-// Builds a GPX file from routes + POIs + water + hazards for use in a dedicated hiking app.
-
-function waypoint(lon, lat, name, desc) {
-  return `  <wpt lat="${lat}" lon="${lon}"><name>${escapeXml(name)}</name>${desc ? `<desc>${escapeXml(desc)}</desc>` : ""}</wpt>`;
-}
+// GPX export for maps.me / Organic Maps: one <trk> per walking day (cleaned
+// track with elevations) + our water and lodging points as <wpt>.
 
 function escapeXml(str) {
   return String(str ?? "").replace(/[<>&'"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "'": "&apos;", '"': "&quot;" }[c]));
 }
 
-export function buildGpx({ places, routes, water, attractions, alerts }) {
-  const wpts = [];
-  for (const p of places) wpts.push(waypoint(p.coordinates[0], p.coordinates[1], p.name, "place"));
-  for (const w of water?.waterPoints ?? []) wpts.push(waypoint(w.coordinates[0], w.coordinates[1], `Water: ${w.name}`, `${w.waterType} / ${w.status}`));
+function waypoint([lon, lat], name, desc, sym) {
+  return `  <wpt lat="${lat}" lon="${lon}"><name>${escapeXml(name)}</name>${desc ? `<desc>${escapeXml(desc)}</desc>` : ""}${sym ? `<sym>${sym}</sym>` : ""}</wpt>`;
+}
 
-  const placeById = new Map(places.map((p) => [p.id, p]));
-  const trks = routes.map((r) => {
-    const coords = r.geometry?.coordinates?.length ? r.geometry.coordinates : [
-      placeById.get(r.fromPlaceId)?.coordinates,
-      placeById.get(r.toPlaceId)?.coordinates,
-    ].filter(Boolean);
-    const segPts = coords.map(([lon, lat]) => `      <trkpt lat="${lat}" lon="${lon}"></trkpt>`).join("\n");
-    return `  <trk><name>${escapeXml(r.name)}</name><trkseg>\n${segPts}\n    </trkseg></trk>`;
+export function buildGpx({ trail, itinerary, routes, waterList, accommodation }) {
+  const dayById = new Map(itinerary.map((d) => [d.id, d]));
+  const routeByDay = new Map(routes.map((r) => [r.dayId, r]));
+
+  const wpts = [];
+  for (const w of waterList) {
+    const label = w.kind === "source" ? "Вода: источник" : "Вода: купить";
+    const desc = w.kind === "source" ? "В октябре может быть сухим — не рассчитывать как на единственный" : (w.osmType ?? "");
+    wpts.push(waypoint(w.coordinates, `${label} — ${w.name}`, desc, w.kind === "source" ? "Drinking Water" : "Shopping Center"));
+  }
+  for (const a of accommodation) {
+    if (!a.coordinates || a.status === "red") continue;
+    const desc = [a.priceInfo, a.address, a.phone, a.checkIn && `Check-in ${a.checkIn}`].filter(Boolean).join(" · ");
+    wpts.push(waypoint(a.coordinates, `Ночёвка: ${a.name}`, desc, a.type === "hotel" ? "Lodging" : "Campground"));
+  }
+
+  const trks = trail.days.map((d) => {
+    const day = dayById.get(d.dayId);
+    const route = routeByDay.get(d.dayId);
+    const name = `${day?.date ?? d.dayId} ${route?.name ?? `${d.from} → ${d.to}`}`;
+    const pts = d.coordinates.map(([lon, lat, ele]) => `      <trkpt lat="${lat}" lon="${lon}"><ele>${ele}</ele></trkpt>`).join("\n");
+    return `  <trk><name>${escapeXml(name)}</name><desc>${escapeXml(`${d.distanceKm} km, +${d.ascentM}/-${d.descentM} m (по треку)`)}</desc><trkseg>\n${pts}\n    </trkseg></trk>`;
   });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="Lycian Way 2026 Trip OS" xmlns="http://www.topografix.com/GPX/1/1">
+<gpx version="1.1" creator="Lycian Way 2026" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>Lycian Way 2026 — Ovacık → Xanthos</name><desc>Cleaned track (source: trekkingmania 2024 GPX), water and lodging points. Map data © OpenStreetMap contributors.</desc></metadata>
 ${wpts.join("\n")}
 ${trks.join("\n")}
 </gpx>`;
@@ -36,6 +47,8 @@ export function downloadGpx(xml, filename = "lycian-way-2026.gpx") {
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }

@@ -4,3 +4,4 @@ dist
 *.log
 .github/workflows/deploy.yml
 public/vendor
+sources/*.gpx

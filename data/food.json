@@ -1,38 +1,83 @@
 {
-  "_comment": "Grocery/cafe/restaurant records. Existence/hours are as noted in the original itinerary only — none independently re-checked yet.",
+  "_comment": "Cafés/shops named in the plan document. OSM shops/cafés along the trail are in pois.json (generated).",
   "foodPlaces": [
     {
       "id": "food-likyada-kahvalti",
       "name": "Likya'da Kahvaltı",
       "placeId": "place-faralya",
+      "coordinates": [
+        29.1531128,
+        36.5240728
+      ],
+      "googleMapsUrl": "https://maps.app.goo.gl/o3FxR98NMjjyHiZB6",
       "category": "cafe",
-      "status": "orange",
-      "confidence": "low",
-      "lastVerified": "2026-09-22",
-      "sources": ["user_itinerary"],
-      "notes": "Listed as a cafe on the Ovacik-Faralya-Kabak leg in the original document; hours/current operation not checked."
+      "dayId": "day-2026-10-09",
+      "status": "neutral",
+      "confidence": "medium",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "plan_google_maps"
+      ],
+      "notes": "Café on the way, ~6 km from the start."
     },
     {
       "id": "food-halils-cafe",
       "name": "Halil's Cafe",
       "placeId": "place-faralya",
+      "coordinates": [
+        29.1596455,
+        36.5251022
+      ],
+      "googleMapsUrl": "https://maps.app.goo.gl/4HuGUG1yaMiQXXAf8",
       "category": "cafe",
-      "status": "orange",
-      "confidence": "low",
-      "lastVerified": "2026-09-22",
-      "sources": ["user_itinerary"],
-      "notes": "Listed as a cafe on the Ovacik-Faralya-Kabak leg in the original document; hours/current operation not checked."
+      "dayId": "day-2026-10-09",
+      "status": "neutral",
+      "confidence": "medium",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "plan_google_maps"
+      ],
+      "notes": "Café on the way (gözleme)."
+    },
+    {
+      "id": "food-alinca-cafes",
+      "name": "Cafés in Alınca",
+      "placeId": "place-alinca",
+      "coordinates": [
+        29.143619,
+        36.446223
+      ],
+      "category": "cafe",
+      "dayId": "day-2026-10-10",
+      "status": "neutral",
+      "confidence": "medium",
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "osm_overpass"
+      ],
+      "notes": "A couple of cafés in Alınca. Nothing on the way from Kabak."
     },
     {
       "id": "food-a101-patara",
-      "name": "A101 (grocery chain)",
-      "placeId": "place-patara",
+      "name": "A101 (grocery)",
+      "placeId": "place-letoon",
+      "coordinates": [
+        29.300411,
+        36.336035
+      ],
       "category": "grocery",
+      "dayId": "day-2026-10-13",
       "status": "neutral",
       "confidence": "medium",
-      "lastVerified": "2026-09-22",
-      "sources": ["user_itinerary"],
-      "notes": "A101 is a nationwide Turkish grocery chain, so existence-in-general is plausible, but this specific branch's location/hours are from a Google Maps screenshot only, not visited."
+      "lastVerified": "2026-10-07",
+      "sources": [
+        "user_itinerary",
+        "osm_overpass"
+      ],
+      "notes": "Mentioned in the plan for the Patara area. In OSM it is near Letoon/Kumluova, on the day 13 route (Şok and BİM nearby too)."
     }
   ]
 }
