@@ -4,7 +4,6 @@
 //   offline -> our self-hosted Protomaps corridor extract if it was downloaded,
 //              otherwise a plain background (trail + markers still work).
 
-import { statusColor } from "./status.js";
 import { totalLength, pointAtDistance, splitPolylineAtDistance } from "./geo.js";
 import { getStoredProgressMeters, updateProgress } from "./progress.js";
 import { buildMarkerGroups } from "./mapMarkers.js";
@@ -90,20 +89,12 @@ export async function resolveStyle(maplibregl, config, layer = "map") {
   return offlineStyle(maplibregl);
 }
 
-function dotMarker(color, size = 14) {
+// Gaia-style pin: red teardrop, category glyph in the head (dark dot when there is none).
+const PIN_SVG = `<svg viewBox="0 0 26 40" aria-hidden="true"><path d="M13 1C6.4 1 1 6.3 1 12.9c0 8.7 10.2 23.4 11.1 24.8a1.1 1.1 0 0 0 1.8 0C14.8 36.3 25 21.6 25 12.9 25 6.3 19.6 1 13 1Z" fill="#F5240E" stroke="#C84727" stroke-width="1.2"/></svg>`;
+function pinMarker(icon) {
   const el = document.createElement("div");
-  el.className = "map-dot-marker";
-  el.style.width = `${size}px`;
-  el.style.height = `${size}px`;
-  el.style.background = color;
-  return el;
-}
-
-function iconMarker(icon, color) {
-  const el = document.createElement("div");
-  el.className = "map-icon-marker";
-  el.style.background = color;
-  el.textContent = icon;
+  el.className = "map-pin";
+  el.innerHTML = PIN_SVG + (icon ? `<span class="map-pin__icon">${icon}</span>` : `<span class="map-pin__dot"></span>`);
   return el;
 }
 
@@ -191,26 +182,26 @@ export async function mountMapLibre(container, ctx) {
     map.addLayer({
       id: "route-casing", type: "line", source: "route-casing",
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#0e1613", "line-width": 6, "line-opacity": 0.35 },
+      paint: { "line-color": "#C84727", "line-width": 5, "line-opacity": 0.5 },
     });
     map.addSource("route-untraveled", { type: "geojson", data: emptyFC() });
     map.addLayer({
       id: "route-untraveled", type: "line", source: "route-untraveled",
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": untraveledColor, "line-width": 4, "line-opacity": 0.95 },
+      paint: { "line-color": untraveledColor, "line-width": 3 },
     });
     map.addSource("route-traveled", { type: "geojson", data: emptyFC() });
     map.addLayer({
       id: "route-traveled", type: "line", source: "route-traveled",
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": traveledColor, "line-width": 4 },
+      paint: { "line-color": traveledColor, "line-width": 3 },
     });
 
     map.addSource("measure", { type: "geojson", data: measureData });
     map.addLayer({
       id: "measure", type: "line", source: "measure",
       layout: { "line-cap": "round", "line-join": "round" },
-      paint: { "line-color": "#FF2D95", "line-width": 6, "line-opacity": 0.9 },
+      paint: { "line-color": "#4BD947", "line-width": 5, "line-opacity": 0.95 },
     });
 
     map.addSource("gps-accuracy", { type: "geojson", data: emptyFC() });
@@ -225,11 +216,11 @@ export async function mountMapLibre(container, ctx) {
   function addMarkers() {
     for (const m of buildMarkerGroups(ctx)) {
       if (!m.coordinates) continue;
-      const el = m.kind === "place" ? dotMarker(statusColor(config, m.data.status)) : iconMarker(m.icon, m.color);
+      const el = pinMarker(m.kind === "place" ? "" : m.icon);
       el.classList.add(`marker--${m.group}`);
       if (m.generated) el.classList.add("marker--generated");
       el.title = m.data.name ?? "";
-      const marker = new maplibregl.Marker({ element: el }).setLngLat(m.coordinates).addTo(map);
+      const marker = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(m.coordinates).addTo(map);
       const domEl = marker.getElement();
       domEl.style.cursor = "pointer";
       domEl.addEventListener("click", (e) => {

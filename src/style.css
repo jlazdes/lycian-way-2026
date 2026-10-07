@@ -1,16 +1,23 @@
 :root {
-  --bg: #14201d;
-  --surface: #1c2b27;
-  --surface-2: #24352f;
-  --text: #eef2ee;
-  --text-dim: #a9b8b1;
-  --border: #33453d;
-  --accent: #7fb3a3;
+  /* P2 tokens, measured from the Gaia GPS reference screenshots */
+  --bg: #000000;          /* sheets, tab bar, popovers */
+  --surface: #1C1D1F;     /* control pill, round map buttons, cards */
+  --surface-2: #38383A;   /* action buttons, close button, dividers */
+  --text: #FFFFFF;
+  --text-dim: #8E8E93;
+  --border: #38383A;
+  --accent: #4BD947;      /* icons, labels, active states, profile line */
+  --accent-strong: #37B235;
+  --trail: #F5240E;       /* track line + pins */
+  --trail-edge: #C84727;
+  --radius-sheet: 20px;
+  --radius-btn: 12px;
+  --map-btn: 40px;
   --status-neutral: #AAAAAA;
   --status-orange: #FF8800;
   --status-yellow: #FFEE00;
   --status-red: #FF0000;
-  --route-traveled: #00FF80;
+  --route-traveled: #4BD947;
   --header-height: 54px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-top: env(safe-area-inset-top, 0px);
@@ -466,3 +473,58 @@ table.phrases td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
   border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.5);
 }
 .layers-menu[hidden] { display: none; }
+
+
+/* ===== P2: Gaia-style visuals (tokens above) ===== */
+header.app-header { background: var(--bg); }
+.card { background: var(--surface); border-color: var(--border); border-radius: var(--radius-btn); }
+.btn { background: var(--surface-2); color: var(--accent); border-radius: var(--radius-btn); font-weight: 600; }
+.btn-secondary { background: var(--surface-2); color: var(--accent); border: none; }
+.segmented { background: var(--surface); }
+.segmented__btn--active { background: var(--surface-2); color: var(--accent); }
+
+/* Pins: red teardrop, icon in the head */
+.map-pin { width: 26px; height: 40px; position: relative; cursor: pointer; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)); }
+.map-pin svg { position: absolute; inset: 0; width: 26px; height: 40px; }
+.map-pin__icon { position: absolute; top: 4px; left: 4px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1; }
+.map-pin__dot { position: absolute; top: 8px; left: 8px; width: 10px; height: 10px; border-radius: 50%; background: #2A2A2C; }
+.map--low-zoom .marker--generated { display: none; }
+.map--water-only.map--low-zoom .marker--generated.marker--water { display: block; }
+
+/* Round map buttons + MapLibre zoom control */
+.map-round-btn { width: var(--map-btn); height: var(--map-btn); border-radius: 50%; background: var(--surface); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.4); right: 10px; }
+.map-round-btn--active { color: var(--accent); }
+.map-round-btn { top: 102px; }
+.map-round-btn--layers { top: 150px; }
+.map-round-btn--measure { top: 198px; }
+.layers-menu { top: 150px; right: 58px; background: var(--bg); border-color: var(--border); }
+.maplibregl-ctrl-group { background: var(--surface) !important; border-radius: 20px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; overflow: hidden; }
+.maplibregl-ctrl-group button { width: 40px !important; height: 40px !important; }
+.maplibregl-ctrl-group button + button { border-top: 1px solid var(--border) !important; }
+.maplibregl-ctrl-group .maplibregl-ctrl-icon { filter: invert(1); }
+
+/* Pill FABs (like "Custom") */
+.map-fab { height: 44px; padding: 0 16px; background: var(--bg); color: var(--text); border: none; border-radius: 22px; font-size: 0.8rem; letter-spacing: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+.map-fab--demo { background: var(--bg); color: var(--accent); border: none; }
+.map-fab--gpx { color: var(--accent); }
+.map-fab--active { background: var(--accent); color: #000; }
+.map-fab--stop-demo { background: var(--trail); color: #fff; border: none; }
+
+/* Sheets: POI panel, GPS/measure panels, Today widget */
+.poi-panel { background: var(--bg); border-color: var(--border); border-radius: var(--radius-sheet) var(--radius-sheet) 0 0; padding-top: 22px; }
+.poi-panel::before { content: ""; position: absolute; top: 7px; left: 50%; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: var(--surface-2); }
+.poi-panel h3 { font-size: 20px; font-weight: 600; }
+.poi-panel p { font-size: 15px; }
+.poi-panel__close, .gps-panel__close { width: 29px; height: 29px; background: var(--surface-2); border: none; color: var(--text); }
+.poi-panel .link-row .btn { flex: 1 1 0; min-height: 52px; display: flex; align-items: center; justify-content: center; text-align: center; }
+.gps-panel { background: var(--bg); border-color: var(--border); border-radius: var(--radius-sheet); }
+.today-widget { background: var(--bg); border-color: var(--border); border-radius: 14px; }
+.today-widget__add, .today-widget__full-day { color: var(--accent); }
+.profile-svg { color: var(--text-dim); }
+.measure-pin { background: var(--accent); color: #000; }
+.progress__bar { background: var(--accent); }
+@media (min-width: 720px) {
+  .poi-panel { border-radius: 0; padding-top: 44px; }
+  .poi-panel::before { display: none; }
+}
+.poi-panel a:not(.btn), .card a:not(.btn), .gps-panel a:not(.btn), .map-fallback-note a { color: var(--accent); }

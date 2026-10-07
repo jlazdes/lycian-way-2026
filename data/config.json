@@ -63,9 +63,9 @@
     }
   },
   "routeProgress": {
-    "note": "Colors for the route line itself: gray for not-yet-walked, green for the portion behind the live GPS position (or the demo playhead).",
-    "untraveled": "#AAAAAA",
-    "traveled": "#00FF80"
+    "note": "Route line colours (P2, Gaia reference): red for the trail, green accent for the part already walked / demo playhead.",
+    "untraveled": "#F5240E",
+    "traveled": "#4BD947"
   },
   "gps": {
     "markerColor": "#1A73E8",

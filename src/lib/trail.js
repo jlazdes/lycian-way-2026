@@ -109,7 +109,7 @@ export function formatHours(h) {
 
 // Elevation profile as an inline SVG string. coords3: [lon,lat,ele][].
 // marks: [{ m: distance from start (m), label, color }]
-export function profileSvg(coords3, { width = 320, height = 90, marks = [], color = "#7fb3a3" } = {}) {
+export function profileSvg(coords3, { width = 320, height = 90, marks = [], color = "#4BD947" } = {}) {
   if (!coords3 || coords3.length < 2) return "";
   const cum = cumulativeDistances(coords3.map((c) => [c[0], c[1]]));
   const total = cum.at(-1) || 1;
@@ -125,9 +125,11 @@ export function profileSvg(coords3, { width = 320, height = 90, marks = [], colo
     const mx = x(Math.max(0, Math.min(total, mk.m)));
     return `<line x1="${mx}" x2="${mx}" y1="${padT}" y2="${height - padB}" stroke="${mk.color ?? "#00A3FF"}" stroke-width="1.5" stroke-dasharray="2 2"/>`;
   }).join("");
+  const gid = `pg${Math.random().toString(36).slice(2, 8)}`;
   return `<svg class="profile-svg" viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="Профиль высот">
-    <path d="${area}" fill="${color}" opacity="0.25"/>
-    <path d="${line}" fill="none" stroke="${color}" stroke-width="1.6"/>
+    <defs><linearGradient id="${gid}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.45"/><stop offset="1" stop-color="#000" stop-opacity="0.1"/></linearGradient></defs>
+    <path d="${area}" fill="url(#${gid})"/>
+    <path d="${line}" fill="none" stroke="${color}" stroke-width="2"/>
     ${markEls}
     <text x="2" y="${padT + 8}" font-size="9" fill="currentColor">${Math.round(max)} м</text>
     <text x="2" y="${height - padB}" font-size="9" fill="currentColor">${Math.round(min)} м</text>
