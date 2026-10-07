@@ -1,3 +1,4 @@
+import { L } from "./i18n.js";
 // GPX export for maps.me / Organic Maps: one <trk> per walking day (cleaned
 // track with elevations) + our water and lodging points as <wpt>.
 
@@ -15,14 +16,14 @@ export function buildGpx({ trail, itinerary, routes, waterList, accommodation })
 
   const wpts = [];
   for (const w of waterList) {
-    const label = w.kind === "source" ? "Вода: источник" : "Вода: купить";
-    const desc = w.kind === "source" ? "В октябре может быть сухим — не рассчитывать как на единственный" : (w.osmType ?? "");
+    const label = w.kind === "source" ? L("Water: spring/tap", "Вода: источник") : L("Water: buy", "Вода: купить");
+    const desc = w.kind === "source" ? L("May be dry in October — not your only source", "В октябре может быть сухим — не рассчитывать как на единственный") : (w.osmType ?? "");
     wpts.push(waypoint(w.coordinates, `${label} — ${w.name}`, desc, w.kind === "source" ? "Drinking Water" : "Shopping Center"));
   }
   for (const a of accommodation) {
     if (!a.coordinates || a.status === "red") continue;
     const desc = [a.priceInfo, a.address, a.phone, a.checkIn && `Check-in ${a.checkIn}`].filter(Boolean).join(" · ");
-    wpts.push(waypoint(a.coordinates, `Ночёвка: ${a.name}`, desc, a.type === "hotel" ? "Lodging" : "Campground"));
+    wpts.push(waypoint(a.coordinates, `${L("Sleep", "Ночёвка")}: ${a.name}`, desc, a.type === "hotel" ? "Lodging" : "Campground"));
   }
 
   const trks = trail.days.map((d) => {
@@ -30,7 +31,7 @@ export function buildGpx({ trail, itinerary, routes, waterList, accommodation })
     const route = routeByDay.get(d.dayId);
     const name = `${day?.date ?? d.dayId} ${route?.name ?? `${d.from} → ${d.to}`}`;
     const pts = d.coordinates.map(([lon, lat, ele]) => `      <trkpt lat="${lat}" lon="${lon}"><ele>${ele}</ele></trkpt>`).join("\n");
-    return `  <trk><name>${escapeXml(name)}</name><desc>${escapeXml(`${d.distanceKm} km, +${d.ascentM}/-${d.descentM} m (по треку)`)}</desc><trkseg>\n${pts}\n    </trkseg></trk>`;
+    return `  <trk><name>${escapeXml(name)}</name><desc>${escapeXml(`${d.distanceKm} km, +${d.ascentM}/-${d.descentM} m (track)`)}</desc><trkseg>\n${pts}\n    </trkseg></trk>`;
   });
 
   return `<?xml version="1.0" encoding="UTF-8"?>

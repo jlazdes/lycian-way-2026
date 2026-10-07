@@ -1,3 +1,4 @@
+import { L, lang } from "./i18n.js";
 // Our cleaned trail (data/trail.json, generated at build time) as one continuous
 // "master" polyline plus per-day slices. Everything that needs "km along the
 // trail" — live position, water ahead, day cards, GPX export — goes through here.
@@ -93,18 +94,19 @@ export function climbOf(coords3, threshold = 8) {
 
 export function formatKm(m) {
   const km = m / 1000;
-  return km < 10 ? km.toFixed(1).replace(".", ",") : String(Math.round(km));
+  const out = km < 10 ? km.toFixed(1) : String(Math.round(km));
+  return lang === "ru" ? out.replace(".", ",") : out;
 }
 
 // "850 м" under a kilometre, otherwise "3,4 км".
 export function formatDist(m) {
-  return m < 1000 ? `${Math.round(m / 10) * 10} м` : `${formatKm(m)} км`;
+  return m < 1000 ? `${Math.round(m / 10) * 10} ${L("m", "м")}` : `${formatKm(m)} ${L("km", "км")}`;
 }
 
 export function formatHours(h) {
   const hh = Math.floor(h);
   const mm = Math.round((h - hh) * 60);
-  return hh ? `${hh} ч ${String(mm).padStart(2, "0")} мин` : `${mm} мин`;
+  return hh ? `${hh} ${L("h", "ч")} ${String(mm).padStart(2, "0")} ${L("min", "мин")}` : `${mm} ${L("min", "мин")}`;
 }
 
 // Elevation profile as an inline SVG string. coords3: [lon,lat,ele][].
@@ -126,14 +128,14 @@ export function profileSvg(coords3, { width = 320, height = 90, marks = [], colo
     return `<line x1="${mx}" x2="${mx}" y1="${padT}" y2="${height - padB}" stroke="${mk.color ?? "#00A3FF"}" stroke-width="1.5" stroke-dasharray="2 2"/>`;
   }).join("");
   const gid = `pg${Math.random().toString(36).slice(2, 8)}`;
-  return `<svg class="profile-svg" viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="Профиль высот">
+  return `<svg class="profile-svg" viewBox="0 0 ${width} ${height}" width="100%" role="img" aria-label="${L("Elevation profile", "Профиль высот")}">
     <defs><linearGradient id="${gid}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.45"/><stop offset="1" stop-color="#000" stop-opacity="0.1"/></linearGradient></defs>
     <path d="${area}" fill="url(#${gid})"/>
     <path d="${line}" fill="none" stroke="${color}" stroke-width="2"/>
     ${markEls}
-    <text x="2" y="${padT + 8}" font-size="9" fill="currentColor">${Math.round(max)} м</text>
-    <text x="2" y="${height - padB}" font-size="9" fill="currentColor">${Math.round(min)} м</text>
+    <text x="2" y="${padT + 8}" font-size="9" fill="currentColor">${Math.round(max)} ${L("m", "м")}</text>
+    <text x="2" y="${height - padB}" font-size="9" fill="currentColor">${Math.round(min)} ${L("m", "м")}</text>
     <text x="${padL}" y="${height - 3}" font-size="9" fill="currentColor">0</text>
-    <text x="${width - 4}" y="${height - 3}" font-size="9" fill="currentColor" text-anchor="end">${formatKm(total)} км</text>
+    <text x="${width - 4}" y="${height - 3}" font-size="9" fill="currentColor" text-anchor="end">${formatKm(total)} ${L("km", "км")}</text>
   </svg>`;
 }

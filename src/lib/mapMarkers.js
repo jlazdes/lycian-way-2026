@@ -1,3 +1,4 @@
+import { L, gpxName } from "./i18n.js";
 // Builds every marker shown on the map from the data files. Records with their
 // own `coordinates` are placed exactly; older records without coordinates are
 // anchored to their placeId and spread apart slightly so they don't stack.
@@ -25,8 +26,8 @@ const CATEGORY_META = {
 };
 const ATTRACTION_ICONS = { ruins: "🏛️", beach: "🏖️", viewpoint: "👁️", viewpoint_beach: "🏖️" };
 const GPX_CATEGORY_LABEL = {
-  village: "Село / магазин (GPX)", trail: "Тропа / развилка (GPX)", ruins: "Руины (GPX)",
-  beach: "Пляж (GPX)", camp: "Кемпинг (GPX)", fuel: "Газ (GPX)", transport: "Автовокзал (GPX)", other: "Точка (GPX)",
+  village: L("Village / shop (GPX)", "Село / магазин (GPX)"), trail: L("Trail / junction (GPX)", "Тропа / развилка (GPX)"), ruins: L("Ruins (GPX)", "Руины (GPX)"),
+  beach: L("Beach (GPX)", "Пляж (GPX)"), camp: L("Camping (GPX)", "Кемпинг (GPX)"), fuel: L("Gas (GPX)", "Газ (GPX)"), transport: L("Bus station (GPX)", "Автовокзал (GPX)"), other: L("Point (GPX)", "Точка (GPX)"),
 };
 
 function offsetCoord([lon, lat], index, count) {
@@ -128,7 +129,7 @@ export function buildMarkerGroups({ places, food, fuel, accommodation, transport
     push({
       id: w.id, kind: "gpx", generated: true, group: w.category === "village" ? "water" : "other",
       coordinates: w.coordinates, icon: meta.icon, color: meta.color,
-      data: { ...w, categoryLabel: GPX_CATEGORY_LABEL[w.category] ?? GPX_CATEGORY_LABEL.other },
+      data: { ...w, name: gpxName(w.name), categoryLabel: GPX_CATEGORY_LABEL[w.category] ?? GPX_CATEGORY_LABEL.other },
     });
   }
 

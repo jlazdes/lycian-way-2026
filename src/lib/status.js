@@ -1,3 +1,4 @@
+import { L } from "./i18n.js";
 // Single source of truth for status -> visual treatment. Used by every screen and the map.
 
 const FALLBACK_COLORS = { neutral: "#AAAAAA", orange: "#FF8800", yellow: "#FFEE00", red: "#FF0000" };
@@ -24,18 +25,20 @@ export function waterVisualStatus(waterStatus) {
   return WATER_STATUS_TO_VISUAL[waterStatus] ?? "orange";
 }
 
-export function statusBadgeHtml(config, status, { small = false } = {}) {
-  const color = statusColor(config, status);
-  const label = statusLabel(config, status);
-  const sizeClass = small ? "status-badge status-badge--small" : "status-badge";
-  const showWarn = status === "orange" || status === "yellow" || status === "red";
-  return `<span class="${sizeClass}" style="--status-color:${color}" title="${escapeHtml(label)}">
-    <span class="status-badge__dot"></span>${showWarn ? "<span class=\"status-badge__warn\">&#9650;</span>" : ""}
-  </span>`;
+// Status as a familiar map-style chip: nothing for verified, a yellow warning
+// triangle for "unverified / check", a red no-entry sign for "closed".
+const WARN_SVG = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2.5 1.5 21h21L12 2.5Z" fill="#FFC400" stroke="#000" stroke-width="1" stroke-linejoin="round"/><path d="M11 9h2v6h-2zM11 16.5h2v2h-2z" fill="#000"/></svg>`;
+const CLOSED_SVG = `<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="#E53935"/><rect x="6" y="10.5" width="12" height="3" rx="1" fill="#fff"/></svg>`;
+
+export function statusBadgeHtml(config, status) {
+  if (status === "red") return `<span class="status-chip status-chip--red">${CLOSED_SVG}${L("Closed", "Закрыто")}</span>`;
+  if (status === "orange") return `<span class="status-chip status-chip--warn">${WARN_SVG}${L("Unverified", "Не проверено")}</span>`;
+  if (status === "yellow") return `<span class="status-chip status-chip--warn">${WARN_SVG}${L("Partly an issue", "Частично проблема")}</span>`;
+  return "";
 }
 
 export function kbBackLink() {
-  return `<a href="#/knowledge" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block;">&larr; Knowledge Base</a>`;
+  return `<a href="#/knowledge" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block;">&larr; ${L("Knowledge Base", "База знаний")}</a>`;
 }
 
 export function escapeHtml(str) {

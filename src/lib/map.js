@@ -10,7 +10,6 @@ import { buildMarkerGroups } from "./mapMarkers.js";
 import { getCachedPmtilesFile, offlineAssetBase } from "./offline.js";
 
 const DEMO_DURATION_MS = 20000;
-const GENERATED_MIN_ZOOM = 12;
 
 const BLANK_STYLE = {
   version: 8,
@@ -76,7 +75,7 @@ async function offlineStyle(maplibregl) {
   };
 }
 
-export async function resolveStyle(maplibregl, config, layer = "map") {
+export async function resolveStyle(maplibregl, config, layer = "topo") {
   if (navigator.onLine) {
     if (layer === "satellite") return { style: SATELLITE_STYLE, mode: "online-satellite" };
     if (layer === "topo") return { style: TOPO_STYLE, mode: "online-topo" };
@@ -91,10 +90,12 @@ export async function resolveStyle(maplibregl, config, layer = "map") {
 
 // Gaia-style pin: red teardrop, category glyph in the head (dark dot when there is none).
 const PIN_SVG = `<svg viewBox="0 0 26 40" aria-hidden="true"><path d="M13 1C6.4 1 1 6.3 1 12.9c0 8.7 10.2 23.4 11.1 24.8a1.1 1.1 0 0 0 1.8 0C14.8 36.3 25 21.6 25 12.9 25 6.3 19.6 1 13 1Z" fill="#F5240E" stroke="#C84727" stroke-width="1.2"/></svg>`;
-function pinMarker(icon) {
+function pinMarker(icon, count) {
   const el = document.createElement("div");
-  el.className = "map-pin";
-  el.innerHTML = PIN_SVG + (icon ? `<span class="map-pin__icon">${icon}</span>` : `<span class="map-pin__dot"></span>`);
+  el.className = count ? "map-pin map-pin--cluster" : "map-pin";
+  const head = count ? `<span class="map-pin__icon map-pin__count">${count}</span>`
+    : icon ? `<span class="map-pin__icon">${icon}</span>` : `<span class="map-pin__dot"></span>`;
+  el.innerHTML = PIN_SVG + head;
   return el;
 }
 
@@ -135,7 +136,7 @@ export async function mountMapLibre(container, ctx) {
   const masterTrail = master.coords;
   const masterLen = totalLength(masterTrail);
 
-  const { style, mode } = await resolveStyle(maplibregl, config, ctx.layer ?? "map");
+  const { style, mode } = await resolveStyle(maplibregl, config, ctx.layer ?? "topo");
   const trailBounds = masterTrail.reduce((b, [lon, lat]) => [[Math.min(b[0][0], lon), Math.min(b[0][1], lat)], [Math.max(b[1][0], lon), Math.max(b[1][1], lat)]], [[180, 90], [-180, -90]]);
 
   const map = new maplibregl.Map({
@@ -159,7 +160,6 @@ export async function mountMapLibre(container, ctx) {
   let measureData = emptyFC();
   let measureMarkers = [];
   let currentMode = mode;
-  const markerEls = [];
 
   function renderRouteSplit(atMeters) {
     if (!map.getSource("route-traveled")) return;
@@ -204,6 +204,10 @@ export async function mountMapLibre(container, ctx) {
       paint: { "line-color": "#4BD947", "line-width": 5, "line-opacity": 0.95 },
     });
 
+    // POIs: clustered GeoJSON source; DOM pins are synced to it in syncPins().
+    map.addSource("pois", { type: "geojson", data: poiData(), cluster: true, clusterRadius: 44, clusterMaxZoom: 14 });
+    map.addLayer({ id: "pois-anchor", type: "circle", source: "pois", paint: { "circle-radius": 0, "circle-opacity": 0 } });
+
     map.addSource("gps-accuracy", { type: "geojson", data: emptyFC() });
     map.addLayer({
       id: "gps-accuracy", type: "fill", source: "gps-accuracy",
@@ -213,37 +217,64 @@ export async function mountMapLibre(container, ctx) {
     renderRouteSplit(progressMeters);
   }
 
-  function addMarkers() {
-    for (const m of buildMarkerGroups(ctx)) {
-      if (!m.coordinates) continue;
-      const el = pinMarker(m.kind === "place" ? "" : m.icon);
-      el.classList.add(`marker--${m.group}`);
-      if (m.generated) el.classList.add("marker--generated");
-      el.title = m.data.name ?? "";
-      const marker = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(m.coordinates).addTo(map);
-      const domEl = marker.getElement();
-      domEl.style.cursor = "pointer";
-      domEl.addEventListener("click", (e) => {
-        e.stopPropagation();
-        poiClickHandler?.({ kind: m.kind, data: m.data });
-      });
-      markerEls.push(domEl);
+  // ---- Pins with clustering (Gaia-style numbered pins) ----
+  const allPins = buildMarkerGroups(ctx).filter((m) => m.coordinates);
+  function poiData() {
+    const list = allPins.map((m, i) => [m, i]).filter(([m]) => !waterOnly || m.group === "water");
+    return { type: "FeatureCollection", features: list.map(([m, i]) => ({ type: "Feature", geometry: { type: "Point", coordinates: m.coordinates }, properties: { i } })) };
+  }
+  const pointMarkers = new Map();   // pin index -> Marker
+  const clusterMarkers = new Map(); // cluster id -> Marker
+  const shown = new Set();
+
+  function pointMarker(i) {
+    if (pointMarkers.has(i)) return pointMarkers.get(i);
+    const m = allPins[i];
+    const el = pinMarker(m.kind === "place" ? "" : m.icon);
+    el.classList.add(`marker--${m.group}`);
+    el.title = m.data.name ?? "";
+    el.addEventListener("click", (e) => { e.stopPropagation(); poiClickHandler?.({ kind: m.kind, data: m.data }); });
+    const mk = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(m.coordinates);
+    pointMarkers.set(i, mk);
+    return mk;
+  }
+  function clusterMarker(id, count, coords) {
+    const key = `${id}:${count}`;
+    if (clusterMarkers.has(key)) return clusterMarkers.get(key);
+    const el = pinMarker("", count);
+    el.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const z = await map.getSource("pois").getClusterExpansionZoom(id);
+      map.easeTo({ center: coords, zoom: z + 0.5 });
+    });
+    const mk = new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat(coords);
+    clusterMarkers.set(key, mk);
+    return mk;
+  }
+  function syncPins() {
+    if (!map.getSource("pois") || !map.isSourceLoaded("pois")) return;
+    const next = new Set();
+    for (const f of map.querySourceFeatures("pois")) {
+      const p = f.properties;
+      const mk = p.cluster ? clusterMarker(p.cluster_id, p.point_count, f.geometry.coordinates) : pointMarker(p.i);
+      next.add(mk);
     }
-    applyVisibility();
+    for (const mk of shown) if (!next.has(mk)) { mk.remove(); shown.delete(mk); }
+    for (const mk of next) if (!shown.has(mk)) { mk.addTo(map); shown.add(mk); }
+  }
+  function resetClusters() {
+    for (const mk of clusterMarkers.values()) { mk.remove(); shown.delete(mk); }
+    clusterMarkers.clear();
   }
 
   function applyVisibility() {
-    const z = map.getZoom();
-    container.classList.toggle("map--low-zoom", z < GENERATED_MIN_ZOOM);
     container.classList.toggle("map--water-only", waterOnly);
   }
 
-  let markersAdded = false;
-  map.on("style.load", () => {
-    addOverlays();
-    if (!markersAdded) { markersAdded = true; addMarkers(); }
-  });
-  map.on("zoomend", applyVisibility);
+  map.on("style.load", () => { resetClusters(); addOverlays(); });
+  map.on("sourcedata", (e) => { if (e.sourceId === "pois" && e.isSourceLoaded) syncPins(); });
+  map.on("moveend", syncPins);
+  map.on("zoomend", () => { resetClusters(); syncPins(); });
   map.on("click", (e) => mapClickHandler?.([e.lngLat.lng, e.lngLat.lat]));
   map.on("error", (e) => {
     // Missing tiles while offline are expected; keep them out of the console noise.
@@ -319,7 +350,7 @@ export async function mountMapLibre(container, ctx) {
     stopDemo,
     fitCoords,
     flyTo(lngLat, zoom = 15) { map.flyTo({ center: lngLat, zoom: Math.max(map.getZoom(), zoom) }); },
-    setWaterOnly(v) { waterOnly = v; applyVisibility(); },
+    setWaterOnly(v) { waterOnly = v; applyVisibility(); resetClusters(); map.getSource("pois")?.setData(poiData()); },
     setMeasureLine(coords) {
       measureData = coords?.length >= 2 ? lineFeature(coords) : emptyFC();
       map.getSource("measure")?.setData(measureData);

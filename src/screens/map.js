@@ -9,10 +9,12 @@ import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
 import { getChecklist, addItem, toggleItem, clearCompleted } from "../lib/checklist.js";
 import { buildMaster, locate, waterAlongTrail, nextWaterAhead, formatKm, formatDist, climbOf, toblerHours, formatHours, profileSvg } from "../lib/trail.js";
 import { pointAtDistance } from "../lib/geo.js";
+import { L } from "../lib/i18n.js";
 
 const KIND_LABEL = {
-  place: "Waypoint", source: "Вода: источник", buy: "Вода: купить", food: "Food / resupply", sleep: "Sleep",
-  transport: "Transport", attraction: "Place to see", hazard: "Watch out", fuel: "Gas", gpx: "Точка из GPX",
+  place: L("Waypoint", "Точка"), source: L("Water: spring/tap", "Вода: источник"), buy: L("Water: buy", "Вода: купить"),
+  food: L("Food / resupply", "Еда / магазин"), sleep: L("Sleep", "Ночёвка"), transport: L("Transport", "Транспорт"),
+  attraction: L("Place to see", "Достопримечательность"), hazard: L("Watch out", "Внимание"), fuel: L("Gas", "Газ"), gpx: L("GPX waypoint", "Точка из GPX"),
 };
 const GPS_PREF_KEY = "lycian-2026-gps-on";
 const OFF_TRAIL_M = 100;
@@ -39,12 +41,17 @@ function writePref(on) {
   try { localStorage.setItem(GPS_PREF_KEY, on ? "1" : "0"); } catch {}
 }
 
-const GEO_HELP = `
+const GEO_HELP = L(`
+  <p><strong>Location access is blocked.</strong> To turn it on:</p>
+  <p><strong>iPhone (Safari or home-screen icon):</strong> Settings → Privacy &amp; Security → Location Services → on; below, "Safari Websites" → "While Using the App". Then in Safari: "aA" in the address bar → Website Settings → Location → Allow. Reload the page.</p>
+  <p><strong>Android (Chrome):</strong> pull down the quick settings and turn on Location. In Chrome: ⋮ → Settings → Site settings → Location → allow jlazdes.github.io (or the lock icon left of the address → Permissions → Location). Reload the page.</p>
+  <p style="color:var(--text-dim);font-size:0.75rem;">GPS works without internet — it only needs location access.</p>
+`, `
   <p><strong>Доступ к геолокации запрещён.</strong> Как включить:</p>
   <p><strong>iPhone (Safari или иконка на главном экране):</strong> Настройки → Конфиденциальность и безопасность → Службы геолокации → включить; ниже «Сайты Safari» → «При использовании». Затем в Safari: «аА» в адресной строке → Настройки веб-сайта → Геопозиция → Разрешить. Перезагрузите страницу.</p>
   <p><strong>Android (Chrome):</strong> опустите шторку и включите «Местоположение». В Chrome: ⋮ → Настройки → Настройки сайтов → Геоданные → разрешить для jlazdes.github.io (или значок замка слева от адреса → Разрешения → Геоданные). Перезагрузите страницу.</p>
   <p style="color:var(--text-dim);font-size:0.75rem;">GPS работает и без интернета — нужен только доступ к геолокации.</p>
-`;
+`);
 
 export async function renderMap(container) {
   const [config, places, routes, water, attractions, alerts, food, fuel, accommodation, transport, days, trail, pois] = await Promise.all([
@@ -74,7 +81,7 @@ export async function renderMap(container) {
 
       <div class="today-widget" id="today-widget">
         <button class="today-widget__header" id="today-widget-toggle">
-          <span>${escapeHtml(today.date)} &middot; Tasks</span>
+          <span>${escapeHtml(today.date)} &middot; ${L("Tasks", "Задачи")}</span>
           <span class="today-widget__chevron" id="today-widget-chevron">&#8964;</span>
         </button>
         <div class="today-widget__body" id="today-widget-body">
@@ -84,39 +91,40 @@ export async function renderMap(container) {
             </div>
           ` : ""}
           <div class="today-widget__list" id="today-tasks-list"></div>
-          <button class="today-widget__add" id="today-add-btn">+ Add item</button>
+          <button class="today-widget__add" id="today-add-btn">${L("+ Add item", "+ Добавить")}</button>
           <div class="today-widget__completed-header" id="today-completed-header" hidden>
-            <span>Completed</span>
-            <button id="today-clear-btn" title="Clear completed" aria-label="Clear completed">🗑</button>
+            <span>${L("Completed", "Сделано")}</span>
+            <button id="today-clear-btn" title="${L("Clear completed", "Очистить")}" aria-label="${L("Clear completed", "Очистить")}">🗑</button>
           </div>
           <div class="today-widget__list today-widget__list--completed" id="today-completed-list"></div>
-          <a href="#/itinerary/${today.id}" class="today-widget__full-day">Full day view &rarr;</a>
+          <a href="#/itinerary/${today.id}" class="today-widget__full-day">${L("Full day view", "Весь день")} &rarr;</a>
         </div>
       </div>
 
-      <button class="map-round-btn" id="locate-btn" title="Где я" aria-label="Где я" aria-pressed="false">
+      <button class="map-round-btn" id="locate-btn" title="${L("Where am I", "Где я")}" aria-label="${L("Where am I", "Где я")}" aria-pressed="false">
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 3h-2.07A7 7 0 0 0 13 5.07V3h-2v2.07A7 7 0 0 0 5.07 11H3v2h2.07A7 7 0 0 0 11 18.93V21h2v-2.07A7 7 0 0 0 18.93 13H21v-2Zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>
       </button>
 
-      <button class="map-round-btn map-round-btn--layers" id="layers-btn" title="Слои карты" aria-label="Слои карты" aria-expanded="false">
+      <button class="map-round-btn map-round-btn--layers" id="layers-btn" title="${L("Map layers", "Слои карты")}" aria-label="${L("Map layers", "Слои карты")}" aria-expanded="false">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="m12 3 10 5.5-10 5.5L2 8.5 12 3Zm-7.6 9.3L12 16.5l7.6-4.2 2.4 1.3-10 5.5-10-5.5 2.4-1.3Z"/></svg>
       </button>
       <div class="layers-menu" id="layers-menu" hidden>
-        <button data-layer="map" aria-pressed="true">Карта</button>
-        <button data-layer="topo">Топо <span class="layers-menu__note">нужен интернет</span></button>
-        <button data-layer="satellite">Спутник <span class="layers-menu__note">нужен интернет</span></button>
+        <button data-layer="topo" aria-pressed="true">${L("Topo", "Топо")} <span class="layers-menu__note">${L("offline: corridor map", "офлайн: карта коридора")}</span></button>
+        <button data-layer="map">${L("Map", "Карта")} <span class="layers-menu__note">${L("needs internet", "нужен интернет")}</span></button>
+        <button data-layer="satellite">${L("Satellite", "Спутник")} <span class="layers-menu__note">${L("needs internet", "нужен интернет")}</span></button>
       </div>
-      <button class="map-round-btn map-round-btn--measure" id="measure-btn" title="Измерить по тропе" aria-label="Измерить по тропе" aria-pressed="false">
+      <button class="map-round-btn map-round-btn--measure" id="measure-btn" title="${L("Measure along the trail", "Измерить по тропе")}" aria-label="${L("Measure along the trail", "Измерить по тропе")}" aria-pressed="false">
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 17.3 17.3 3 21 6.7 6.7 21 3 17.3Zm3.7 1.3 1-1-1.6-1.6.9-.9 1.6 1.6 1.2-1.2-1-1 .9-.9 1 1 1.2-1.2-1.6-1.6.9-.9 1.6 1.6 1.2-1.2-1-1 .9-.9 1 1 1.2-1.2-1.6-1.6.9-.9 1.6 1.6 1-1-1.3-1.3L5.4 17.3l1.3 1.3Z"/></svg>
       </button>
 
       <div id="gps-panel" class="gps-panel" hidden></div>
       <div id="measure-panel" class="gps-panel measure-panel" hidden></div>
 
-      <button class="map-fab map-fab--demo" id="demo-btn">▶ Play Demo</button>
-      <button class="map-fab map-fab--stop-demo" id="demo-stop-btn" hidden>✕ End Demo</button>
-      <button class="map-fab map-fab--water" id="water-only-btn" aria-pressed="false">💧 Только вода</button>
-      <button class="map-fab map-fab--gpx" id="gpx-btn" title="Скачать GPX" aria-label="Скачать GPX">GPX</button>
+      <button class="map-fab map-fab--demo" id="demo-btn">${L("▶ Play Demo", "▶ Демо")}</button>
+      <button class="map-fab map-fab--stop-demo" id="demo-stop-btn" hidden>${L("✕ End Demo", "✕ Стоп")}</button>
+      <button class="map-fab map-fab--water" id="water-only-btn" aria-pressed="false">💧 ${L("Water only", "Только вода")}</button>
+      <button class="map-fab map-fab--measure" id="measure-fab" aria-pressed="false">📏 ${L("Measure", "Измерить")}</button>
+      <button class="map-fab map-fab--gpx" id="gpx-btn" title="${L("Download GPX", "Скачать GPX")}" aria-label="${L("Download GPX", "Скачать GPX")}">GPX</button>
 
       <div id="poi-panel" class="poi-panel" hidden>
         <button class="poi-panel__close" id="poi-close-btn" aria-label="Close">&times;</button>
@@ -139,7 +147,7 @@ export async function renderMap(container) {
         <input type="checkbox" data-id="${i.id}" />
         <span>${escapeHtml(i.text)}</span>
       </label>
-    `).join("") || `<p class="empty-state" style="padding:6px 0;">Nothing left — nice.</p>`;
+    `).join("") || `<p class="empty-state" style="padding:6px 0;">${L("Nothing left — nice.", "Всё сделано!")}</p>`;
     completedHeader.hidden = done.length === 0;
     completedList.innerHTML = done.map((i) => `
       <label class="today-widget__item today-widget__item--done">
@@ -154,7 +162,7 @@ export async function renderMap(container) {
   renderChecklist();
 
   container.querySelector("#today-add-btn").addEventListener("click", () => {
-    const text = prompt("Add a task");
+    const text = prompt(L("Add a task", "Новая задача"));
     if (text && text.trim()) { addItem(today, text.trim()); renderChecklist(); }
   });
   container.querySelector("#today-clear-btn").addEventListener("click", () => {
@@ -182,8 +190,8 @@ export async function renderMap(container) {
     const loc = locate(master, coords);
     if (!loc || loc.offTrailM > 3000) return "";
     const day = loc.day;
-    const dayInfo = day ? `${escapeHtml(dayById.get(day.dayId)?.date ?? "")}: ${formatKm(loc.alongM - day.startM)} км от старта дня` : "";
-    return `<p class="poi-panel__meta">${dayInfo}${loc.offTrailM > 30 ? ` &middot; ${Math.round(loc.offTrailM)} м от тропы` : " &middot; на тропе"}</p>`;
+    const dayInfo = day ? `${escapeHtml(dayById.get(day.dayId)?.date ?? "")}: ${formatDist(loc.alongM - day.startM)} ${L("from the day start", "от старта дня")}` : "";
+    return `<p class="poi-panel__meta">${dayInfo}${loc.offTrailM > 30 ? ` &middot; ${formatDist(loc.offTrailM)} ${L("off the trail", "от тропы")}` : ` &middot; ${L("on the trail", "на тропе")}`}</p>`;
   }
 
   function mapsLinks(coords, gmapsUrl) {
@@ -203,34 +211,34 @@ export async function renderMap(container) {
       status = data.curated ? waterVisualStatus("uncertain") : "orange";
       bodyExtra = `
         <p class="poi-panel__category">${escapeHtml(data.osmType ?? "spring")}${data.osm ? ` &middot; <a href="https://www.openstreetmap.org/${data.osm}" target="_blank" rel="noopener">OSM</a>` : ""}</p>
-        <p class="poi-warning">В октябре может быть сухим, не рассчитывать как на единственный.</p>
+        <p class="poi-warning">${L("May be dry in October — don't rely on it as your only source.", "В октябре может быть сухим, не рассчитывать как на единственный.")}</p>
         ${data.notes ? `<p>${escapeHtml(data.notes)}</p>` : ""}`;
     } else if (kind === "buy") {
       status = "neutral";
       bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.osmType ?? "")}${data.osm ? ` &middot; <a href="https://www.openstreetmap.org/${data.osm}" target="_blank" rel="noopener">OSM</a>` : ""}</p>
-        <p>Купить воду — надёжно (магазин / кафе). Часы работы не проверены.</p>`;
+        <p>${L("Buy water — reliable (shop / café). Opening hours not checked.", "Купить воду — надёжно (магазин / кафе). Часы работы не проверены.")}</p>`;
     } else if (kind === "food") {
       bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.category ?? "food")}</p>`;
     } else if (kind === "fuel") {
       bodyExtra = `<p class="poi-panel__category">gas &middot; stock of EN417 canisters ${data.canisterStockConfirmed ? "confirmed" : "not confirmed"}</p>`;
     } else if (kind === "sleep") {
-      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.type ?? "camp")}${data.booked ? " &middot; <strong>забронировано</strong>" : ""}</p>
+      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.type ?? "camp")}${data.booked ? ` &middot; <strong>${L("booked", "забронировано")}</strong>` : ""}</p>
         ${data.address ? `<p>${escapeHtml(data.address)}</p>` : ""}
         ${data.phone ? `<p><a href="tel:${data.phone.replace(/\s/g, "")}">${escapeHtml(data.phone)}</a></p>` : ""}
-        ${data.checkIn ? `<p>Заезд: ${escapeHtml(data.checkIn)}<br>Выезд: ${escapeHtml(data.checkOut ?? "")}</p>` : ""}
+        ${data.checkIn ? `<p>${L("Check-in", "Заезд")}: ${escapeHtml(data.checkIn)}<br>${L("Check-out", "Выезд")}: ${escapeHtml(data.checkOut ?? "")}</p>` : ""}
         <p>${escapeHtml(data.priceInfo ?? "")}</p>`;
     } else if (kind === "transport") {
       const segs = data.details?.segments ?? (data.details?.flightNo ? [data.details] : []);
       bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.mode ?? "transport")}${data.date ? ` &middot; ${escapeHtml(data.date)}` : ""}</p>
         ${segs.map((s) => `<p><strong>${escapeHtml(s.flightNo)}</strong> ${escapeHtml(s.from)} ${escapeHtml(s.depart)} → ${escapeHtml(s.to)} ${escapeHtml(s.arrive)}</p>`).join("")}`;
     } else if (kind === "attraction") {
-      const learnMore = data.category === "ruins" ? `<a href="#/knowledge/ancient-lycia">More on Ancient Lycia &rarr;</a>` : "";
+      const learnMore = data.category === "ruins" ? `<a href="#/knowledge/ancient-lycia">${L("More on Ancient Lycia", "Подробнее о Ликии")} &rarr;</a>` : "";
       bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.category)}</p><p>${escapeHtml(data.shortDescription ?? "")}</p>${learnMore ? `<p>${learnMore}</p>` : ""}`;
     } else if (kind === "hazard") {
-      bodyExtra = `<p><a href="#/knowledge/route-decisions">More on route decisions &rarr;</a> &middot; <a href="#/knowledge/safety">Safety notes &rarr;</a></p>`;
+      bodyExtra = `<p><a href="#/knowledge/route-decisions">${L("Route decisions", "Решения по маршруту")} &rarr;</a> &middot; <a href="#/knowledge/safety">${L("Safety notes", "Безопасность")} &rarr;</a></p>`;
     } else if (kind === "gpx") {
       status = "neutral";
-      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.categoryLabel)}</p><p style="color:var(--text-dim);font-size:0.75rem;">Из GPX trekkingmania (2024) — может быть устаревшим.</p>`;
+      bodyExtra = `<p class="poi-panel__category">${escapeHtml(data.categoryLabel)}</p><p style="color:var(--text-dim);font-size:0.75rem;">${L("From the trekkingmania GPX (2024) — may be outdated.", "Из GPX trekkingmania (2024) — может быть устаревшим.")}</p>`;
     }
     const sources = await Promise.all((data.sources ?? []).map((id) => getSourceById(id)));
     const anchor = coords ?? placeById.get(data.placeId)?.coordinates;
@@ -241,8 +249,8 @@ export async function renderMap(container) {
       ${anchor ? trailPositionLine(anchor) : ""}
       ${bodyExtra}
       ${data.notes && kind !== "source" ? `<p>${escapeHtml(data.notes)}</p>` : ""}
-      ${data.confidence ? `<p style="font-size:0.75rem;color:var(--text-dim);">Confidence: ${escapeHtml(data.confidence)}${data.lastVerified ? ` &middot; last verified ${escapeHtml(data.lastVerified)}` : ""}</p>` : ""}
-      ${sources.filter(Boolean).length ? `<div class="section-title">Sources</div>${sources.filter(Boolean).map((s) => s.url
+      ${data.confidence ? `<p style="font-size:0.75rem;color:var(--text-dim);">${L("Confidence", "Достоверность")}: ${escapeHtml(data.confidence)}${data.lastVerified ? ` &middot; ${L("last verified", "проверено")} ${escapeHtml(data.lastVerified)}` : ""}</p>` : ""}
+      ${sources.filter(Boolean).length ? `<div class="section-title">${L("Sources", "Источники")}</div>${sources.filter(Boolean).map((s) => s.url
         ? `<p><a href="${s.url}" target="_blank" rel="noopener">${escapeHtml(s.title)}</a></p>`
         : `<p>${escapeHtml(s.title)}</p>`).join("")}` : ""}
       ${anchor ? mapsLinks(anchor, data.googleMapsUrl) : ""}
@@ -254,7 +262,7 @@ export async function renderMap(container) {
   poiCloseBtn.addEventListener("click", closePoiPanel);
 
   function drawFallback() {
-    fallbackNote.textContent = "Упрощённая схема — карта не запустилась на этом устройстве.";
+    fallbackNote.textContent = L("Simplified view — the map could not start on this device.", "Упрощённая схема — карта не запустилась на этом устройстве.");
     fallbackNote.hidden = false;
     renderOfflineMap(wrap, { config, places, master, waterList, gpsPosition: getLastPosition() });
   }
@@ -272,10 +280,10 @@ export async function renderMap(container) {
       renderPoiPanel(poi);
     });
     if (mapApi.mode === "offline-map") {
-      fallbackNote.textContent = "Офлайн: карта коридора ±2 км";
+      fallbackNote.textContent = L("Offline: corridor map ±2 km", "Офлайн: карта коридора ±2 км");
       fallbackNote.hidden = false;
     } else if (mapApi.mode === "offline-blank") {
-      fallbackNote.innerHTML = `Офлайн — подложка не скачана. Трек и точки работают. <a href="#/knowledge">Скачать карту</a>`;
+      fallbackNote.innerHTML = L(`Offline — base map not downloaded. Trail and points still work. <a href="#/knowledge">Download map</a>`, `Офлайн — подложка не скачана. Трек и точки работают. <a href="#/knowledge">Скачать карту</a>`);
       fallbackNote.hidden = false;
     }
   } catch (e) {
@@ -296,37 +304,37 @@ export async function renderMap(container) {
     gpsPanel.hidden = measureOn;
     if (error && !position) {
       if (error.code === 1) {
-        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="Закрыть">&times;</button>${GEO_HELP}`;
+        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="${L("Close", "Закрыть")}">&times;</button>${GEO_HELP}`;
       } else {
-        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="Закрыть">&times;</button><p>Не удаётся определить местоположение: ${escapeHtml(error.message)}. Выйдите на открытое место и подождите.</p>`;
+        gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="${L("Close", "Закрыть")}">&times;</button><p>${L("Can't get a location fix", "Не удаётся определить местоположение")}: ${escapeHtml(error.message)}. ${L("Move to open ground and wait.", "Выйдите на открытое место и подождите.")}</p>`;
       }
       gpsPanel.querySelector(".gps-panel__close").addEventListener("click", () => setGps(false));
       offTrailBanner.hidden = true;
       return;
     }
     if (!position) {
-      gpsPanel.innerHTML = `<p>Ищем GPS…</p>`;
+      gpsPanel.innerHTML = `<p>${L("Finding GPS…", "Ищем GPS…")}</p>`;
       return;
     }
     const loc = locate(master, [position.lon, position.lat]);
-    const acc = `±${Math.round(position.accuracy ?? 0)} м`;
+    const acc = `±${Math.round(position.accuracy ?? 0)} ${L("m", "м")}`;
     if (!loc || loc.offTrailM > FAR_AWAY_M) {
       offTrailBanner.hidden = true;
-      gpsPanel.innerHTML = `<p><strong>Вы далеко от маршрута</strong> — ${formatKm(loc?.offTrailM ?? 0)} км до тропы. <span class="gps-panel__acc">${acc}</span></p>`;
+      gpsPanel.innerHTML = `<p><strong>${L("You are far from the route", "Вы далеко от маршрута")}</strong> — ${formatDist(loc?.offTrailM ?? 0)} ${L("to the trail", "до тропы")}. <span class="gps-panel__acc">${acc}</span></p>`;
       return;
     }
     offTrailBanner.hidden = loc.offTrailM <= OFF_TRAIL_M;
-    offTrailBanner.textContent = `Вы в ${Math.round(loc.offTrailM)} м от тропы`;
+    offTrailBanner.textContent = L(`You are ${Math.round(loc.offTrailM)} m off the trail`, `Вы в ${Math.round(loc.offTrailM)} м от тропы`);
     const day = loc.day ?? master.days.at(-1);
     const toFinish = Math.max(0, day.endM - loc.alongM);
     const route = routeByDay.get(day.dayId);
     const src = nextWaterAhead(waterList, loc.alongM, "source");
     const buy = nextWaterAhead(waterList, loc.alongM, "buy");
     gpsPanel.innerHTML = `
-      <div class="gps-panel__row"><span>До финиша дня${route ? ` (${escapeHtml(day.to)})` : ""}</span><strong>${formatDist(toFinish)}</strong></div>
-      <div class="gps-panel__row"><span>💧 Источник впереди${src ? ` — ${escapeHtml(src.name)}` : ""}</span><strong>${src ? formatDist(src.alongM - loc.alongM) : "—"}</strong></div>
-      <div class="gps-panel__row"><span>🛒 Купить воду${buy ? ` — ${escapeHtml(buy.name)}` : ""}</span><strong>${buy ? formatDist(buy.alongM - loc.alongM) : "—"}</strong></div>
-      <div class="gps-panel__foot">по тропе &middot; точность ${acc}</div>
+      <div class="gps-panel__row"><span>${L("To the day's finish", "До финиша дня")}${route ? ` (${escapeHtml(day.to)})` : ""}</span><strong>${formatDist(toFinish)}</strong></div>
+      <div class="gps-panel__row"><span>💧 ${L("Next spring/tap", "Источник впереди")}${src ? ` — ${escapeHtml(src.name)}` : ""}</span><strong>${src ? formatDist(src.alongM - loc.alongM) : "—"}</strong></div>
+      <div class="gps-panel__row"><span>🛒 ${L("Buy water", "Купить воду")}${buy ? ` — ${escapeHtml(buy.name)}` : ""}</span><strong>${buy ? formatDist(buy.alongM - loc.alongM) : "—"}</strong></div>
+      <div class="gps-panel__foot">${L("along the trail", "по тропе")} &middot; ${L("accuracy", "точность")} ${acc}</div>
     `;
   }
 
@@ -369,7 +377,7 @@ export async function renderMap(container) {
   layersBtn.addEventListener("click", () => {
     layersMenu.hidden = !layersMenu.hidden;
     layersBtn.setAttribute("aria-expanded", String(!layersMenu.hidden));
-    layersMenu.querySelectorAll("[data-layer]").forEach((b) => { b.disabled = b.dataset.layer !== "map" && !navigator.onLine; });
+    layersMenu.querySelectorAll("[data-layer]").forEach((b) => { b.disabled = b.dataset.layer !== "topo" && !navigator.onLine; });
   });
   layersMenu.querySelectorAll("[data-layer]").forEach((btn) => {
     btn.addEventListener("click", async () => {
@@ -377,8 +385,8 @@ export async function renderMap(container) {
       layersMenu.querySelectorAll("[data-layer]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
       layersMenu.hidden = true;
       const mode = await mapApi.setLayer(btn.dataset.layer);
-      if (mode.startsWith("offline") && btn.dataset.layer !== "map") {
-        fallbackNote.textContent = "Нет интернета — показана офлайн-карта.";
+      if (mode.startsWith("offline") && btn.dataset.layer !== "topo") {
+        fallbackNote.textContent = L("No internet — showing the offline map.", "Нет интернета — показана офлайн-карта.");
         fallbackNote.hidden = false;
       }
     });
@@ -406,24 +414,24 @@ export async function renderMap(container) {
 
   function appLinks([lon, lat]) {
     return `<div class="link-row">
-      <span style="font-size:0.72rem;color:var(--text-dim);align-self:center;">Открыть Б в:</span>
+      <span style="font-size:0.72rem;color:var(--text-dim);align-self:center;">${L("Open B in:", "Открыть Б в:")}</span>
       <a class="btn btn-secondary" href="om://map?ll=${lat},${lon}&n=1">Organic Maps</a>
       <a class="btn btn-secondary" href="mapsme://map?ll=${lat},${lon}&n=1">maps.me</a>
       <a class="btn btn-secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}">Google Maps</a>
     </div>
-    <p class="gps-panel__foot">Только по нашему треку. Маршрут вне тропы не прокладывается — для этого откройте точку в приложении (нужен интернет или офлайн-карты в приложении).</p>`;
+    <p class="gps-panel__foot">${L("Along our track only. No off-trail routing — open the point in an app for that (needs internet or the app's offline maps).", "Только по нашему треку. Маршрут вне тропы не прокладывается — для этого откройте точку в приложении (нужен интернет или офлайн-карты в приложении).")}</p>`;
   }
 
   function renderMeasure(msg) {
     if (!measureOn) { measurePanel.hidden = true; return; }
     measurePanel.hidden = false;
     gpsPanel.hidden = true;
-    const head = `<button class="gps-panel__close" id="measure-close" aria-label="Закрыть">&times;</button><strong>Измерить по тропе</strong>`;
-    const actions = `<div class="link-row"><button class="btn btn-secondary" id="measure-from-me">📍 От меня</button><button class="btn btn-secondary" id="measure-reset">Сбросить</button></div>`;
+    const head = `<button class="gps-panel__close" id="measure-close" aria-label="${L("Close", "Закрыть")}">&times;</button><strong>${L("Measure along the trail", "Измерить по тропе")}</strong>`;
+    const actions = `<div class="link-row"><button class="btn btn-secondary" id="measure-from-me">📍 ${L("From me", "От меня")}</button><button class="btn btn-secondary" id="measure-reset">${L("Reset", "Сбросить")}</button></div>`;
     let body;
     if (msg) body = `<p>${msg}</p>`;
-    else if (!ptA) body = `<p>Тапните точку A на треке — или «От меня».</p>`;
-    else if (!ptB) body = `<p>A: ${formatKm(ptA.alongM)} км по тропе${ptA.fromMe ? " (вы)" : ""}. Теперь тапните точку Б.</p>`;
+    else if (!ptA) body = `<p>${L("Tap point A on the trail — or “From me”.", "Тапните точку A на треке — или «От меня».")}</p>`;
+    else if (!ptB) body = `<p>A: ${formatDist(ptA.alongM)} ${L("along the trail", "по тропе")}${ptA.fromMe ? L(" (you)", " (вы)") : ""}. ${L("Now tap point B.", "Теперь тапните точку Б.")}</p>`;
     else {
       const forward = ptB.alongM >= ptA.alongM;
       let seg = slice(Math.min(ptA.alongM, ptB.alongM), Math.max(ptA.alongM, ptB.alongM));
@@ -431,9 +439,9 @@ export async function renderMap(container) {
       const { ascentM, descentM } = climbOf(seg);
       const dist = Math.abs(ptB.alongM - ptA.alongM);
       body = `
-        <div class="gps-panel__row"><span>Расстояние по тропе</span><strong>${formatDist(dist)}</strong></div>
-        <div class="gps-panel__row"><span>Набор / сброс</span><strong>+${ascentM} / −${descentM} м</strong></div>
-        <div class="gps-panel__row"><span>Время (оценка, формула Тоблера)</span><strong>≈ ${formatHours(toblerHours(seg))}</strong></div>
+        <div class="gps-panel__row"><span>${L("Distance along the trail", "Расстояние по тропе")}</span><strong>${formatDist(dist)}</strong></div>
+        <div class="gps-panel__row"><span>${L("Gain / loss", "Набор / сброс")}</span><strong>+${ascentM} / −${descentM} ${L("m", "м")}</strong></div>
+        <div class="gps-panel__row"><span>${L("Time (estimate, Tobler)", "Время (оценка, формула Тоблера)")}</span><strong>≈ ${formatHours(toblerHours(seg))}</strong></div>
         ${profileSvg(seg, { height: 70 })}
         ${appLinks(ptB.point)}`;
     }
@@ -445,7 +453,7 @@ export async function renderMap(container) {
       if (pos) { setAFromPosition(pos); return; }
       waitingGpsForA = true;
       if (!gpsOn) setGps(true);
-      renderMeasure("Ждём GPS…");
+      renderMeasure(L("Waiting for GPS…", "Ждём GPS…"));
     });
   }
 
@@ -462,7 +470,7 @@ export async function renderMap(container) {
   function setAFromPosition(pos) {
     waitingGpsForA = false;
     const loc = locate(master, [pos.lon, pos.lat]);
-    if (!loc || loc.offTrailM > SNAP_M) { syncMeasure(`Вы в ${formatDist(loc?.offTrailM ?? 0)} от тропы — «От меня» работает только рядом с треком.`); return; }
+    if (!loc || loc.offTrailM > SNAP_M) { syncMeasure(L(`You are ${formatDist(loc?.offTrailM ?? 0)} off the trail — “From me” only works near the track.`, `Вы в ${formatDist(loc?.offTrailM ?? 0)} от тропы — «От меня» работает только рядом с треком.`)); return; }
     ptA = { alongM: loc.alongM, point: loc.point, fromMe: true };
     ptB = null;
     syncMeasure();
@@ -472,17 +480,20 @@ export async function renderMap(container) {
     measureOn = on;
     measureBtn.classList.toggle("map-round-btn--active", on);
     measureBtn.setAttribute("aria-pressed", String(on));
+    measureFab.classList.toggle("map-fab--active", on);
     container.querySelector(".map-screen").classList.toggle("map-screen--measuring", on);
     if (!on) { ptA = ptB = null; waitingGpsForA = false; syncMeasure(); renderGpsPanel(getLastPosition(), null); return; }
     closePoiPanel();
     syncMeasure();
   }
+  const measureFab = container.querySelector("#measure-fab");
   measureBtn.addEventListener("click", () => setMeasure(!measureOn));
+  measureFab.addEventListener("click", () => setMeasure(!measureOn));
 
   mapApi?.setOnMapClick((lngLat) => { if (measureOn) onMeasureTap(lngLat); });
   function onMeasureTap(lngLat) {
     const loc = locate(master, lngLat);
-    if (!loc || loc.offTrailM > SNAP_M) { renderMeasure(`Тапните ближе к треку (сейчас ${formatDist(loc?.offTrailM ?? 0)} от него).`); return; }
+    if (!loc || loc.offTrailM > SNAP_M) { renderMeasure(L(`Tap closer to the trail (now ${formatDist(loc?.offTrailM ?? 0)} away).`, `Тапните ближе к треку (сейчас ${formatDist(loc?.offTrailM ?? 0)} от него).`)); return; }
     const pt = { alongM: loc.alongM, point: loc.point };
     if (!ptA || (ptA && ptB)) { ptA = pt; ptB = null; } else { ptB = pt; }
     syncMeasure();
