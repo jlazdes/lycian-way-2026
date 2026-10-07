@@ -36,7 +36,7 @@
     },
     "tileProvider": {
       "note": "Swappable — do not hardcode this provider elsewhere in the app. lib/map.js reads this value. OpenFreeMap is free, no API key, no usage cap as of writing.",
-      "styleUrl": "https://tiles.openfreemap.org/styles/positron"
+      "styleUrl": "https://tiles.openfreemap.org/styles/liberty"
     },
     "offline": {
       "note": "Self-hosted Protomaps corridor extract (see scripts/build-offline-map.mjs). Used when the device is offline; never bulk-cache the online provider.",
