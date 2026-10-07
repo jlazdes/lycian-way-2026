@@ -36,8 +36,8 @@ const TOPO_STYLE = {
   sources: {
     topo: {
       type: "raster", tileSize: 256, maxzoom: 17,
-      tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"],
-      attribution: "© Esri, HERE, Garmin, USGS, NGA, OpenStreetMap contributors",
+      tiles: ["https://a.tile.opentopomap.org/{z}/{x}/{y}.png", "https://b.tile.opentopomap.org/{z}/{x}/{y}.png", "https://c.tile.opentopomap.org/{z}/{x}/{y}.png"],
+      attribution: 'Map data © <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>, SRTM · Style © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',
     },
   },
   layers: [{ id: "topo", type: "raster", source: "topo" }],
@@ -156,6 +156,7 @@ export async function mountMapLibre(container, ctx) {
     maxZoom: 18,
   });
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+  container.maplibreMap = map; // handle for automated UI checks
 
   let poiClickHandler = null;
   let mapClickHandler = null;
@@ -164,6 +165,9 @@ export async function mountMapLibre(container, ctx) {
   let demoRaf = null;
   let gpsMarker = null;
   let waterOnly = false;
+  let measureData = emptyFC();
+  let measureMarkers = [];
+  let currentMode = mode;
   const markerEls = [];
 
   function renderRouteSplit(atMeters) {
@@ -202,7 +206,7 @@ export async function mountMapLibre(container, ctx) {
       paint: { "line-color": traveledColor, "line-width": 4 },
     });
 
-    map.addSource("measure", { type: "geojson", data: emptyFC() });
+    map.addSource("measure", { type: "geojson", data: measureData });
     map.addLayer({
       id: "measure", type: "line", source: "measure",
       layout: { "line-cap": "round", "line-join": "round" },
@@ -243,15 +247,16 @@ export async function mountMapLibre(container, ctx) {
     container.classList.toggle("map--water-only", waterOnly);
   }
 
-  map.on("load", () => {
+  let markersAdded = false;
+  map.on("style.load", () => {
     addOverlays();
-    addMarkers();
+    if (!markersAdded) { markersAdded = true; addMarkers(); }
   });
   map.on("zoomend", applyVisibility);
   map.on("click", (e) => mapClickHandler?.([e.lngLat.lng, e.lngLat.lat]));
   map.on("error", (e) => {
     // Missing tiles while offline are expected; keep them out of the console noise.
-    if (mode.startsWith("offline")) return;
+    if (currentMode.startsWith("offline")) return;
     console.warn("map error", e?.error?.message ?? e);
   });
 
@@ -316,7 +321,6 @@ export async function mountMapLibre(container, ctx) {
 
   return {
     map,
-    mode,
     setOnPoiClick(fn) { poiClickHandler = fn; },
     setOnMapClick(fn) { mapClickHandler = fn; },
     setGpsPosition,
@@ -325,7 +329,26 @@ export async function mountMapLibre(container, ctx) {
     fitCoords,
     flyTo(lngLat, zoom = 15) { map.flyTo({ center: lngLat, zoom: Math.max(map.getZoom(), zoom) }); },
     setWaterOnly(v) { waterOnly = v; applyVisibility(); },
-    setMeasureLine(coords) { map.getSource("measure")?.setData(coords?.length >= 2 ? lineFeature(coords) : emptyFC()); },
+    setMeasureLine(coords) {
+      measureData = coords?.length >= 2 ? lineFeature(coords) : emptyFC();
+      map.getSource("measure")?.setData(measureData);
+    },
+    setMeasurePoints(points) {
+      measureMarkers.forEach((m) => m.remove());
+      measureMarkers = points.map((pt, i) => {
+        const el = document.createElement("div");
+        el.className = "measure-pin";
+        el.textContent = i === 0 ? "A" : "Б";
+        return new maplibregl.Marker({ element: el }).setLngLat(pt).addTo(map);
+      });
+    },
+    async setLayer(layer) {
+      const next = await resolveStyle(maplibregl, config, layer);
+      currentMode = next.mode;
+      map.setStyle(next.style, { diff: false });
+      return next.mode;
+    },
+    get mode() { return currentMode; },
     get isDemoActive() { return demoActive; },
   };
 }

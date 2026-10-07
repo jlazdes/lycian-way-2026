@@ -19,7 +19,7 @@ function precacheManifest() {
           if (statSync(full).isDirectory()) {
             if (rel === "offline") continue;
             walk(full);
-          } else if (!rel.endsWith(".map") && rel !== "sw.js" && !rel.endsWith("README.md") && !rel.endsWith(".geojson")) {
+          } else if (!rel.endsWith(".map") && rel !== "sw.js" && rel !== ".nojekyll" && !rel.endsWith("README.md") && !rel.endsWith(".geojson")) {
             files.push(rel);
           }
         }

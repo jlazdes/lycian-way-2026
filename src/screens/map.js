@@ -7,7 +7,8 @@ import { subscribeGps, startGps, stopGps, getLastPosition, configureGps } from "
 import { buildGpx, downloadGpx } from "../lib/gpx.js";
 import { statusBadgeHtml, escapeHtml } from "../lib/status.js";
 import { getChecklist, addItem, toggleItem, clearCompleted } from "../lib/checklist.js";
-import { buildMaster, locate, waterAlongTrail, nextWaterAhead, formatKm, formatDist } from "../lib/trail.js";
+import { buildMaster, locate, waterAlongTrail, nextWaterAhead, formatKm, formatDist, climbOf, toblerHours, formatHours, profileSvg } from "../lib/trail.js";
+import { pointAtDistance } from "../lib/geo.js";
 
 const KIND_LABEL = {
   place: "Waypoint", source: "Вода: источник", buy: "Вода: купить", food: "Food / resupply", sleep: "Sleep",
@@ -97,7 +98,20 @@ export async function renderMap(container) {
         <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 3h-2.07A7 7 0 0 0 13 5.07V3h-2v2.07A7 7 0 0 0 5.07 11H3v2h2.07A7 7 0 0 0 11 18.93V21h2v-2.07A7 7 0 0 0 18.93 13H21v-2Zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>
       </button>
 
+      <button class="map-round-btn map-round-btn--layers" id="layers-btn" title="Слои карты" aria-label="Слои карты" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="m12 3 10 5.5-10 5.5L2 8.5 12 3Zm-7.6 9.3L12 16.5l7.6-4.2 2.4 1.3-10 5.5-10-5.5 2.4-1.3Z"/></svg>
+      </button>
+      <div class="layers-menu" id="layers-menu" hidden>
+        <button data-layer="map" aria-pressed="true">Карта</button>
+        <button data-layer="topo">Топо <span class="layers-menu__note">нужен интернет</span></button>
+        <button data-layer="satellite">Спутник <span class="layers-menu__note">нужен интернет</span></button>
+      </div>
+      <button class="map-round-btn map-round-btn--measure" id="measure-btn" title="Измерить по тропе" aria-label="Измерить по тропе" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M3 17.3 17.3 3 21 6.7 6.7 21 3 17.3Zm3.7 1.3 1-1-1.6-1.6.9-.9 1.6 1.6 1.2-1.2-1-1 .9-.9 1 1 1.2-1.2-1.6-1.6.9-.9 1.6 1.6 1.2-1.2-1-1 .9-.9 1 1 1.2-1.2-1.6-1.6.9-.9 1.6 1.6 1-1-1.3-1.3L5.4 17.3l1.3 1.3Z"/></svg>
+      </button>
+
       <div id="gps-panel" class="gps-panel" hidden></div>
+      <div id="measure-panel" class="gps-panel measure-panel" hidden></div>
 
       <button class="map-fab map-fab--demo" id="demo-btn">▶ Play Demo</button>
       <button class="map-fab map-fab--stop-demo" id="demo-stop-btn" hidden>✕ End Demo</button>
@@ -252,7 +266,11 @@ export async function renderMap(container) {
     mapApi = await mountMapLibre(wrap.querySelector("#maplibre-container"), {
       config, places, routes, food, fuel, accommodation, transport, attractions, master, waterList, pois, transportLines,
     });
-    mapApi.setOnPoiClick(renderPoiPanel);
+    mapApi.setOnPoiClick((poi) => {
+      // In «Измерить» mode a marker tap is a measuring tap at that spot.
+      if (measureOn && (poi.data.coordinates ?? placeById.get(poi.data.placeId)?.coordinates)) { onMeasureTap(poi.data.coordinates ?? placeById.get(poi.data.placeId).coordinates); return; }
+      renderPoiPanel(poi);
+    });
     if (mapApi.mode === "offline-map") {
       fallbackNote.textContent = "Офлайн: карта коридора ±2 км";
       fallbackNote.hidden = false;
@@ -271,10 +289,11 @@ export async function renderMap(container) {
   const offTrailBanner = container.querySelector("#offtrail-banner");
   let gpsOn = false;
   let centeredOnce = false;
+  let measureOn = false; // «Измерить» mode (see below); hides the GPS panel while on
 
   function renderGpsPanel(position, error) {
     if (!gpsOn) { gpsPanel.hidden = true; offTrailBanner.hidden = true; return; }
-    gpsPanel.hidden = false;
+    gpsPanel.hidden = measureOn;
     if (error && !position) {
       if (error.code === 1) {
         gpsPanel.innerHTML = `<button class="gps-panel__close" aria-label="Закрыть">&times;</button>${GEO_HELP}`;
@@ -342,6 +361,133 @@ export async function renderMap(container) {
     renderGpsPanel(position, error);
   });
   if (readPref()) setGps(true);
+
+
+  // --- Слои ---
+  const layersBtn = container.querySelector("#layers-btn");
+  const layersMenu = container.querySelector("#layers-menu");
+  layersBtn.addEventListener("click", () => {
+    layersMenu.hidden = !layersMenu.hidden;
+    layersBtn.setAttribute("aria-expanded", String(!layersMenu.hidden));
+    layersMenu.querySelectorAll("[data-layer]").forEach((b) => { b.disabled = b.dataset.layer !== "map" && !navigator.onLine; });
+  });
+  layersMenu.querySelectorAll("[data-layer]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      if (!mapApi) return;
+      layersMenu.querySelectorAll("[data-layer]").forEach((b) => b.setAttribute("aria-pressed", String(b === btn)));
+      layersMenu.hidden = true;
+      const mode = await mapApi.setLayer(btn.dataset.layer);
+      if (mode.startsWith("offline") && btn.dataset.layer !== "map") {
+        fallbackNote.textContent = "Нет интернета — показана офлайн-карта.";
+        fallbackNote.hidden = false;
+      }
+    });
+  });
+
+  // --- Измерить A→Б по тропе ---
+  const measureBtn = container.querySelector("#measure-btn");
+  const measurePanel = container.querySelector("#measure-panel");
+  const SNAP_M = 300;
+  let ptA = null, ptB = null, waitingGpsForA = false;
+
+  function slice(fromM, toM) {
+    const { coords, ele, cum } = master;
+    const eleAt = (m) => {
+      let i = cum.findIndex((c) => c >= m);
+      if (i <= 0) return ele[0];
+      const t = (m - cum[i - 1]) / Math.max(1, cum[i] - cum[i - 1]);
+      return ele[i - 1] + t * (ele[i] - ele[i - 1]);
+    };
+    const out = [[...pointAtDistance(coords, fromM), eleAt(fromM)]];
+    for (let i = 0; i < coords.length; i++) if (cum[i] > fromM && cum[i] < toM) out.push([coords[i][0], coords[i][1], ele[i]]);
+    out.push([...pointAtDistance(coords, toM), eleAt(toM)]);
+    return out;
+  }
+
+  function appLinks([lon, lat]) {
+    return `<div class="link-row">
+      <span style="font-size:0.72rem;color:var(--text-dim);align-self:center;">Открыть Б в:</span>
+      <a class="btn btn-secondary" href="om://map?ll=${lat},${lon}&n=1">Organic Maps</a>
+      <a class="btn btn-secondary" href="mapsme://map?ll=${lat},${lon}&n=1">maps.me</a>
+      <a class="btn btn-secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}">Google Maps</a>
+    </div>
+    <p class="gps-panel__foot">Только по нашему треку. Маршрут вне тропы не прокладывается — для этого откройте точку в приложении (нужен интернет или офлайн-карты в приложении).</p>`;
+  }
+
+  function renderMeasure(msg) {
+    if (!measureOn) { measurePanel.hidden = true; return; }
+    measurePanel.hidden = false;
+    gpsPanel.hidden = true;
+    const head = `<button class="gps-panel__close" id="measure-close" aria-label="Закрыть">&times;</button><strong>Измерить по тропе</strong>`;
+    const actions = `<div class="link-row"><button class="btn btn-secondary" id="measure-from-me">📍 От меня</button><button class="btn btn-secondary" id="measure-reset">Сбросить</button></div>`;
+    let body;
+    if (msg) body = `<p>${msg}</p>`;
+    else if (!ptA) body = `<p>Тапните точку A на треке — или «От меня».</p>`;
+    else if (!ptB) body = `<p>A: ${formatKm(ptA.alongM)} км по тропе${ptA.fromMe ? " (вы)" : ""}. Теперь тапните точку Б.</p>`;
+    else {
+      const forward = ptB.alongM >= ptA.alongM;
+      let seg = slice(Math.min(ptA.alongM, ptB.alongM), Math.max(ptA.alongM, ptB.alongM));
+      if (!forward) seg = seg.reverse();
+      const { ascentM, descentM } = climbOf(seg);
+      const dist = Math.abs(ptB.alongM - ptA.alongM);
+      body = `
+        <div class="gps-panel__row"><span>Расстояние по тропе</span><strong>${formatDist(dist)}</strong></div>
+        <div class="gps-panel__row"><span>Набор / сброс</span><strong>+${ascentM} / −${descentM} м</strong></div>
+        <div class="gps-panel__row"><span>Время (оценка, формула Тоблера)</span><strong>≈ ${formatHours(toblerHours(seg))}</strong></div>
+        ${profileSvg(seg, { height: 70 })}
+        ${appLinks(ptB.point)}`;
+    }
+    measurePanel.innerHTML = `${head}${body}${actions}`;
+    measurePanel.querySelector("#measure-close").addEventListener("click", () => setMeasure(false));
+    measurePanel.querySelector("#measure-reset").addEventListener("click", () => { ptA = ptB = null; syncMeasure(); });
+    measurePanel.querySelector("#measure-from-me").addEventListener("click", () => {
+      const pos = getLastPosition();
+      if (pos) { setAFromPosition(pos); return; }
+      waitingGpsForA = true;
+      if (!gpsOn) setGps(true);
+      renderMeasure("Ждём GPS…");
+    });
+  }
+
+  function syncMeasure(msg) {
+    mapApi?.setMeasurePoints([ptA, ptB].filter(Boolean).map((p) => p.point));
+    if (ptA && ptB) {
+      mapApi?.setMeasureLine(slice(Math.min(ptA.alongM, ptB.alongM), Math.max(ptA.alongM, ptB.alongM)).map((c) => [c[0], c[1]]));
+    } else {
+      mapApi?.setMeasureLine(null);
+    }
+    renderMeasure(msg);
+  }
+
+  function setAFromPosition(pos) {
+    waitingGpsForA = false;
+    const loc = locate(master, [pos.lon, pos.lat]);
+    if (!loc || loc.offTrailM > SNAP_M) { syncMeasure(`Вы в ${formatDist(loc?.offTrailM ?? 0)} от тропы — «От меня» работает только рядом с треком.`); return; }
+    ptA = { alongM: loc.alongM, point: loc.point, fromMe: true };
+    ptB = null;
+    syncMeasure();
+  }
+
+  function setMeasure(on) {
+    measureOn = on;
+    measureBtn.classList.toggle("map-round-btn--active", on);
+    measureBtn.setAttribute("aria-pressed", String(on));
+    container.querySelector(".map-screen").classList.toggle("map-screen--measuring", on);
+    if (!on) { ptA = ptB = null; waitingGpsForA = false; syncMeasure(); renderGpsPanel(getLastPosition(), null); return; }
+    closePoiPanel();
+    syncMeasure();
+  }
+  measureBtn.addEventListener("click", () => setMeasure(!measureOn));
+
+  mapApi?.setOnMapClick((lngLat) => { if (measureOn) onMeasureTap(lngLat); });
+  function onMeasureTap(lngLat) {
+    const loc = locate(master, lngLat);
+    if (!loc || loc.offTrailM > SNAP_M) { renderMeasure(`Тапните ближе к треку (сейчас ${formatDist(loc?.offTrailM ?? 0)} от него).`); return; }
+    const pt = { alongM: loc.alongM, point: loc.point };
+    if (!ptA || (ptA && ptB)) { ptA = pt; ptB = null; } else { ptB = pt; }
+    syncMeasure();
+  }
+  subscribeGps(({ position }) => { if (measureOn && waitingGpsForA && position) setAFromPosition(position); });
 
   // --- Только вода ---
   const waterBtn = container.querySelector("#water-only-btn");
