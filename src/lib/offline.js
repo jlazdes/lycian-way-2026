@@ -1,3 +1,4 @@
+import { L, lang } from "./i18n.js";
 // PWA + offline. Two caches:
 //  - SHELL_CACHE: app shell, data, KB articles. Precached by the service worker
 //    on install (list injected at build time), refreshable via "Save for offline".
@@ -106,15 +107,15 @@ export async function isMapDownloaded() {
 
 // onProgress(bytesDone, bytesTotal)
 export async function downloadMap(onProgress) {
-  if (!("caches" in window)) throw new Error("Этот браузер не поддерживает офлайн-кэш.");
+  if (!("caches" in window)) throw new Error(L("This browser has no offline cache.", "Этот браузер не поддерживает офлайн-кэш."));
   const manifest = await getMapManifest();
-  if (!manifest) throw new Error("Не удалось получить список файлов карты — нужен интернет.");
+  if (!manifest) throw new Error(L("Couldn't get the map file list — needs internet.", "Не удалось получить список файлов карты — нужен интернет."));
   const cache = await caches.open(MAP_CACHE);
   let done = 0;
   for (const f of manifest.files) {
     const url = mapUrl(f.path);
     const res = await fetch(url, { cache: "no-cache" });
-    if (!res.ok || !res.body) throw new Error(`Ошибка загрузки ${f.path}: ${res.status}`);
+    if (!res.ok || !res.body) throw new Error(`${L("Download error", "Ошибка загрузки")} ${f.path}: ${res.status}`);
     const reader = res.body.getReader();
     const chunks = [];
     let fileBytes = 0;
@@ -150,6 +151,7 @@ export function offlineAssetBase() {
 }
 
 export function formatBytes(n) {
-  if (n < 1024 * 1024) return `${Math.round(n / 1024)} КБ`;
-  return `${(n / 1024 / 1024).toFixed(1).replace(".", ",")} МБ`;
+  if (n < 1024 * 1024) return `${Math.round(n / 1024)} ${L("KB", "КБ")}`;
+  const mb = (n / 1024 / 1024).toFixed(1);
+  return `${lang === "ru" ? mb.replace(".", ",") : mb} ${L("MB", "МБ")}`;
 }
